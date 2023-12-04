@@ -18,5 +18,5 @@ COPY . $DockerHOME
 RUN pip install -r requirements.txt
 EXPOSE 8001
 
-
-CMD ["python3 main.py"]
+RUN chmod +x /home/apps/15min-user-api/start.sh
+CMD ["./start.sh"]
