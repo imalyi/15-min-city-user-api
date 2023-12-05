@@ -1,17 +1,20 @@
 import re
 from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError, ServerSelectionTimeoutError
-
+import os
 import logging
 
 logger = logging.getLogger(f"{__name__}_Database")
 
-MONGO_CONNECT = "mongodb://gmaps:gmaps@bed:28017/"
-MONGO_DB_NAME = "15min"
-MONGO_DB_HOST = 123
+MONGO_DB_HOST = os.environ.get("MONGO_DB_HOST", "bed")
+MONGO_DB_PORT = os.environ.get("MONGO_DB_PORT", 28017)
+MONGO_DB_NAME = os.environ.get("MONGO_DB_NAME", '15min')
+MONGO_DB_USERNAME = os.environ.get("MONGO_DB_USERNAME", 'gmaps')
+MONGO_DB_PASSWORD = os.environ.get("MONGO_DB_PASSWORD", 'gmaps')
+MONGO_CONNECT = os.environ.get("MONGO_CONNECT", f"mongodb://{MONGO_DB_USERNAME}:{MONGO_DB_PASSWORD}@{MONGO_DB_HOST}:{MONGO_DB_PORT}/")
 
 
-class MongoDatabase():
+class MongoDatabase:
     def __init__(self):
         self.__connect()
 
