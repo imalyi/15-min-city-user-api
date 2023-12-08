@@ -8,17 +8,15 @@ from starlette.middleware.cors import CORSMiddleware
 app = FastAPI()
 
 
-middleware = [
-    Middleware(
-        CORSMiddleware,
-        allow_origins=['*'],
-        allow_credentials=True,
-        allow_methods=['*'],
-        allow_headers=['*']
-    )
-]
 
-app.add_middleware()
+
+
+app.add_middleware(middleware_class=CORSMiddleware,
+    allow_origins=['*'],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],)
+
 def get_database():
     return MongoDatabase()
 
