@@ -5,20 +5,20 @@ import uvicorn
 
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
+app = FastAPI()
+
 
 middleware = [
     Middleware(
         CORSMiddleware,
-        allow_origins=['http://localhost:3000', 'http://localhost:3000/'],
+        allow_origins=['*'],
         allow_credentials=True,
         allow_methods=['*'],
         allow_headers=['*']
     )
 ]
 
-app = FastAPI(middleware=middleware)
-
-
+app.add_middleware()
 def get_database():
     return MongoDatabase()
 
