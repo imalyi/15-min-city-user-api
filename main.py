@@ -18,7 +18,6 @@ middleware = [
 
 app = FastAPI(middleware=middleware)
 
-
 def get_database():
     return MongoDatabase()
 
