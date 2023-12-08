@@ -38,10 +38,14 @@ class MongoDatabase:
     def search_by_coordinates(self, lon: float, lat: float):
         query = {
             "location": {
-                "$geoWithin": {
-                    "$centerSphere": [[lon, lat], 0.013 / 6371]
+                "$near": {
+                    "$geometry": {
+                        "type": "Point",
+                        "coordinates": [lon, lat]
+                    },
+                    "$maxDistance": 300
                 }
             }
         }
-        result = self.db['address'].find(query).limit(5)
+        result = self.db['address'].find(query).limit(50)
         return [{"address": doc.get('full'), "id": str(doc.get('_id'))} for doc in result]
