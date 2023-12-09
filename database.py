@@ -64,7 +64,7 @@ class MongoDatabase:
                 extracted_amenities = [
                     {'name': amenity.get('name', ''),
                      'location': amenity.get('location', []),
-                     'distance': amenity.get('distance', random.randint(0, 1600))}
+                     'distance': amenity.get('distance', -1)}
                     for amenity in amenities_list
                 ]
                 result_dict[amenity_name] = extracted_amenities
