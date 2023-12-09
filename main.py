@@ -5,7 +5,6 @@ import uvicorn
 from starlette.middleware.cors import CORSMiddleware
 app = FastAPI()
 
-
 app.add_middleware(middleware_class=CORSMiddleware,
     allow_origins=['*'],
     allow_credentials=True,
