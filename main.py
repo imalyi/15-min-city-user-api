@@ -2,8 +2,6 @@ import logging
 from fastapi import Depends, FastAPI
 from database import MongoDatabase
 import uvicorn
-
-from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
 app = FastAPI()
 
@@ -12,6 +10,7 @@ app.add_middleware(middleware_class=CORSMiddleware,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],)
+
 
 def get_database():
     return MongoDatabase()
@@ -31,6 +30,12 @@ async def get_address_by_name(name: str=None, lon: float=None, lat: float=None, 
 
     logging.info(results)
     return results
+
+
+@app.get('/report/')
+async def get_report(address_id: str, database: MongoDatabase = Depends(get_database)):
+    return database.get_report_from_id(address_id)
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8001)
