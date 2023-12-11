@@ -5,7 +5,6 @@ import uvicorn
 from starlette.middleware.cors import CORSMiddleware
 app = FastAPI()
 
-
 app.add_middleware(middleware_class=CORSMiddleware,
     allow_origins=['*'],
     allow_credentials=True,
@@ -37,7 +36,7 @@ async def get_address_by_name(name: str=None, lon: float=None, lat: float=None, 
 async def get_report(address_id: str, database: MongoDatabase = Depends(get_database)):
     return database.get_report_from_id(address_id)
 
-
+  
 @app.get('/roles')
 async def get_roles():
     roles = [
@@ -52,7 +51,6 @@ async def get_roles():
         {'id': 20, 'title': 'Photographer'},
     ]
     return roles
-
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8001)
