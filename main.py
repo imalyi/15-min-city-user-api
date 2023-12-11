@@ -3,6 +3,9 @@ from fastapi import Depends, FastAPI
 from database import MongoDatabase
 import uvicorn
 from starlette.middleware.cors import CORSMiddleware
+from typing import List
+
+from fastapi import FastAPI, Query
 app = FastAPI()
 
 
@@ -34,7 +37,8 @@ async def get_address_by_name(name: str=None, lon: float=None, lat: float=None, 
 
 
 @app.get('/report/')
-async def get_report(address_id: str, database: MongoDatabase = Depends(get_database)):
+async def get_report(address_id: str, roles: List[int] = Query(None), database: MongoDatabase = Depends(get_database)):
+    print(roles)
     return database.get_report_from_id(address_id)
 
 
