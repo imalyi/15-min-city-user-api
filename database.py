@@ -35,7 +35,7 @@ class MongoDatabase:
             logger.error(f"Error executing MongoDB query: {e}")
             return []
 
-        return [{"address": doc.get('full'), "id": str(doc.get('_id'))} for doc in result]
+        return [{"address": doc.get('full'), "id": str(doc.get('_id')), 'location': doc.get('location')} for doc in result]
 
     def search_by_coordinates(self, lon: float, lat: float):
         query = {
