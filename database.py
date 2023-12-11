@@ -55,18 +55,28 @@ class MongoDatabase:
     def get_report_from_id(self, address_id: str):
         specified_id = ObjectId(address_id)
         address_document = self.db['address'].find_one({"_id": specified_id})
+        result_dict = {
+            'request': {
+                'address': address_document.get('full'),
+                'location': address_document.get('location')
+            },
+            'osm': {
+                'points_of_interest': {}  # Initialize the 'points_of_interest' dictionary
+            }
+        }
+
         if address_document:
             points_of_interests = address_document.get('points_of_interest', {})
 
-            result_dict = {}
-
             for amenity_name, amenities_list in points_of_interests.items():
                 extracted_amenities = [
-                    {'name': amenity.get('name', ''),
-                     'location': amenity.get('location', []),
-                     'distance': amenity.get('distance', -1)}
+                    {
+                        'name': amenity.get('name', ''),
+                        'location': amenity.get('location', []),
+                        'distance': amenity.get('distance', -1)
+                    }
                     for amenity in amenities_list
                 ]
-                result_dict[amenity_name] = extracted_amenities
-            return result_dict
+                result_dict['osm']['points_of_interest'][amenity_name] = extracted_amenities
 
+        return result_dict
