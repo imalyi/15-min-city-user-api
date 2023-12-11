@@ -36,9 +36,10 @@ async def get_address_by_name(name: str=None, lon: float=None, lat: float=None, 
     return results
 
 
-
+@app.get('/report/')
 async def get_report(address_id: str, database: MongoDatabase = Depends(get_database)):
     return database.get_report_from_id(address_id)
+
 
 @app.get('/roles')
 async def get_roles():
