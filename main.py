@@ -1,11 +1,14 @@
 import logging
-from fastapi import Depends, FastAPI
-from database import MongoDatabase
-import uvicorn
-from starlette.middleware.cors import CORSMiddleware
-from typing import List
 
-from fastapi import FastAPI, Query
+import uvicorn
+from fastapi import Depends
+from fastapi import FastAPI
+from starlette.middleware.cors import CORSMiddleware
+
+from database import MongoDatabase
+
+
+logging.basicConfig(level=logging.INFO)
 app = FastAPI()
 
 
@@ -18,9 +21,6 @@ app.add_middleware(middleware_class=CORSMiddleware,
 
 def get_database():
     return MongoDatabase()
-
-
-logging.basicConfig(level=logging.INFO)
 
 
 @app.get("/address/")
