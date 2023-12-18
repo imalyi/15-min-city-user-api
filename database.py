@@ -28,14 +28,14 @@ class MongoDatabase:
             logger.error("Failed to connect to MongoDB server")
 
     def search_by_partial_name(self, address: str):
-        queries = [{"full": {"$regex": re.compile(f'.*{part}.*', re.IGNORECASE)}} for part in address.split()]
+        queries = [{"address.full": {"$regex": re.compile(f'.*{part}.*', re.IGNORECASE)}} for part in address.split()]
         try:
             result = self.db['address'].find({"$and": queries}).limit(5)
         except Exception as e:
             logger.error(f"Error executing MongoDB query: {e}")
             return []
 
-        return [{"address": doc.get('full'), "id": str(doc.get('_id')), 'location': doc.get('location')} for doc in result]
+        return [{"address": doc.get('address').get('full'), "id": str(doc.get('_id')), 'location': doc.get('location')} for doc in result]
 
     def search_by_coordinates(self, lon: float, lat: float):
         query = {
@@ -57,7 +57,7 @@ class MongoDatabase:
         address_document = self.db['address'].find_one({"_id": specified_id})
         result_dict = {
             'request': {
-                'address': address_document.get('full'),
+                'address': address_document.get('address', {}).get('full'),
                 'location': address_document.get('location')
             },
             'osm': {
@@ -73,7 +73,10 @@ class MongoDatabase:
                     {
                         'name': amenity.get('name', ''),
                         'location': amenity.get('location', []),
-                        'distance': amenity.get('distance', -1)
+                        'distance': amenity.get('distance', -1),
+                        'tags': amenity.get('tags', {}),
+                        'source': amenity.get('source', 'unknown'),
+                        'address': amenity.get('address', {})
                     }
                     for amenity in amenities_list
                 ]
