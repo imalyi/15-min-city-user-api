@@ -50,7 +50,7 @@ class MongoDatabase:
             }
         }
         result = self.db['address'].find(query).limit(50)
-        return [{"address": doc.get('full'), "id": str(doc.get('_id'))} for doc in result]
+        return [{"address": doc.get('address', {}).get('full'), "id": str(doc.get('_id'))} for doc in result]
 
     def get_report_from_id(self, address_id: str):
         specified_id = ObjectId(address_id)
