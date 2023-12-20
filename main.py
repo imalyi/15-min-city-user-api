@@ -31,7 +31,6 @@ async def get_address_by_name(name: str=None, lon: float=None, lat: float=None, 
         results = database.search_by_coordinates(lon, lat)
     else:
         return {"error": "Invalid parameters"}
-
     logging.info(results)
     return results
 
@@ -40,21 +39,6 @@ async def get_address_by_name(name: str=None, lon: float=None, lat: float=None, 
 async def get_report(address_id: str, database: MongoDatabase = Depends(get_database)):
     return database.get_report_from_id(address_id)
 
-
-@app.get('/roles')
-async def get_roles():
-    roles = [
-        {'id': 1, 'title': 'Car Owner'},
-        {'id': 2, 'title': 'Parent'},
-        {'id': 3, 'title': 'Cyclist'},
-        {'id': 4, 'title': 'Public Transport User'},
-        {'id': 6, 'title': 'Pet Owner'},
-        {'id': 7, 'title': 'Foodie'},
-        {'id': 9, 'title': 'Book Lover'},
-        {'id': 18, 'title': 'Sports Fan'},
-        {'id': 20, 'title': 'Photographer'},
-    ]
-    return roles
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8001)
