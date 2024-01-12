@@ -40,5 +40,9 @@ async def get_report(address_id: str, database: MongoDatabase = Depends(get_data
     return database.get_report_from_id(address_id)
 
 
+@app.get("/categories/")
+async def get_categories(database: MongoDatabase = Depends(get_database)):
+    return database.get_all_categories()
+
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8001)

@@ -1,10 +1,9 @@
 import re
 from pymongo import MongoClient
-from pymongo.errors import DuplicateKeyError, ServerSelectionTimeoutError
+from pymongo.errors import ServerSelectionTimeoutError
 import os
 import logging
 from bson import ObjectId
-import random
 
 logger = logging.getLogger(f"{__name__}_Database")
 
@@ -81,5 +80,11 @@ class MongoDatabase:
                     for amenity in amenities_list
                 ]
                 result_dict['osm']['points_of_interest'][amenity_name] = extracted_amenities
-
         return result_dict
+
+    def get_all_categories(self):
+        categories_cursor = self.db['categories'].find({}, {'_id': 0})
+
+        categories_list = list(categories_cursor)
+        return categories_list
+
