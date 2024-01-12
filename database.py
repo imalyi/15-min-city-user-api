@@ -88,7 +88,3 @@ class MongoDatabase:
         categories_list = list(categories_cursor)
         return categories_list
 
-
-d = MongoDatabase()
-a = d.get_all_categories()
-print()
