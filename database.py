@@ -51,7 +51,15 @@ class MongoDatabase:
         result = self.db['address'].find(query).limit(10)
         return [{"address": doc.get('address', {}).get('full'), "id": str(doc.get('_id'))} for doc in result]
 
-    def get_report_from_id(self, address_id: str):
+    def get_name_by_id(self, category_id):
+        for category in self.db['categories'].find({}, {"_id": 0}):
+            for category_name, category_data in category.items():
+                for row in category_data:
+                    if row.get('id') == category_id:
+                        return row.get('name').lower()
+
+    def get_report_from_id(self, address_id: str, categories_ids: list):
+        requested_categories = [self.get_name_by_id(category_id) for category_id in categories_ids]
         specified_id = ObjectId(address_id)
         address_document = self.db['address'].find_one({"_id": specified_id})
         result_dict = {
@@ -68,6 +76,8 @@ class MongoDatabase:
             points_of_interests = address_document.get('points_of_interest', {})
 
             for amenity_name, amenities_list in points_of_interests.items():
+                if amenity_name not in requested_categories:
+                    continue
                 extracted_amenities = [
                     {
                         'name': amenity.get('name', ''),
@@ -79,15 +89,11 @@ class MongoDatabase:
                     }
                     for amenity in amenities_list
                 ]
-
                 extracted_amenities.sort(key=lambda x: x['distance'], reverse=False)
-
                 result_dict['osm']['points_of_interest'][amenity_name] = extracted_amenities
         return result_dict
 
     def get_all_categories(self):
         categories_cursor = self.db['categories'].find({}, {'_id': 0})
-
         categories_list = list(categories_cursor)
         return categories_list
-
