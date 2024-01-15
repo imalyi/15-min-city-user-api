@@ -53,6 +53,10 @@ class MongoDatabase:
         return [{"address": doc.get('address', {}).get('full'), "id": str(doc.get('_id'))} for doc in result]
 
     def get_name_by_id(self, category_id):
+        try:
+            category_id = int(category_id)
+        except ValueError:
+            return None
         for category in self.db['categories'].find({}, {"_id": 0}):
             for category_name, category_data in category.items():
                 for row in category_data:
