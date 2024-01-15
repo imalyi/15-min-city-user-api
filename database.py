@@ -18,6 +18,7 @@ MONGO_CONNECT = os.environ.get("MONGO_CONNECT", f"mongodb://{MONGO_DB_USERNAME}:
 class MongoDatabase:
     def __init__(self):
         self.__connect()
+        self._create_index_for_location()
 
     def __connect(self):
         try:
@@ -97,3 +98,7 @@ class MongoDatabase:
         categories_cursor = self.db['categories'].find({}, {'_id': 0})
         categories_list = list(categories_cursor)
         return categories_list
+
+    def _create_index_for_location(self):
+        result = self.db['address'].create_index([("location", "2dsphere")])
+
