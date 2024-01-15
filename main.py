@@ -37,6 +37,7 @@ async def get_address_by_name(name: str=None, lon: float=None, lat: float=None, 
 
 @app.post('/report/')
 async def get_report(data: dict, database: MongoDatabase = Depends(get_database)):
+    print(data)
     return database.get_report_from_id(data.get('address_id'), data.get('categories_ids'))
 
 
