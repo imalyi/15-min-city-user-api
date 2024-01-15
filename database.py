@@ -95,7 +95,7 @@ class MongoDatabase:
                     for amenity in amenities_list
                 ]
                 extracted_amenities.sort(key=lambda x: x['distance'], reverse=False)
-                result_dict['osm']['points_of_interest'][amenity_name] = extracted_amenities
+                result_dict['osm']['points_of_interest'][amenity_name.capitalize()] = extracted_amenities
         return result_dict
 
     def get_all_categories(self):
