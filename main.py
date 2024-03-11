@@ -1,49 +1,28 @@
-import logging
-
 import uvicorn
-from fastapi import Depends
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-from database import MongoDatabase
+
+from routers import report
+from routers import categories
+from routers import address
+from mangum import Mangum
 
 
-logging.basicConfig(level=logging.INFO)
 app = FastAPI()
 
+app.include_router(report.router, prefix='/report', tags=['Report'])
+app.include_router(categories.router, prefix="/categories", tags=["Categories"])
+app.include_router(address.router, prefix="/address", tags=["Address"])
 
-app.add_middleware(middleware_class=CORSMiddleware,
-    allow_origins=['*'],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],)
-
-
-def get_database():
-    return MongoDatabase()
-
-
-@app.get("/address/")
-async def get_address_by_name(name: str=None, lon: float=None, lat: float=None, database: MongoDatabase = Depends(get_database)):
-    if name:
-        results = database.search_by_partial_name(name)
-    elif lat is not None and lon is not None:
-        results = database.search_by_coordinates(lon, lat)
-    else:
-        return {"error": "Invalid parameters"}
-    logging.info(results)
-    return results
+#app.add_middleware(middleware_class=CORSMiddleware,
+#    allow_origins=['*'],
+#    allow_credentials=True,
+#    allow_methods=["*"],
+#    allow_headers=["*"],)
 
 
-@app.post('/report/')
-async def get_report(data: dict, database: MongoDatabase = Depends(get_database)):
-    print(data)
-    return database.get_report_from_id(data.get('address_id'), data.get('categories_ids'))
-
-
-@app.get("/categories/")
-async def get_categories(database: MongoDatabase = Depends(get_database)):
-    return database.get_all_categories()
+#handler = Mangum(app)
 
 
 if __name__ == "__main__":
