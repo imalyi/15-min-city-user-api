@@ -51,8 +51,15 @@ class MongoDatabase:
         result = self.db['address'].find(query).limit(10)
         return [{"address": doc.get('address', {}).get('full'), "id": str(doc.get('_id'))} for doc in result]
 
-    def get_report(self, address: str, categories: list[str]):
+    def get_report(self, address: str, requested_categories: list[str]):
         address_document = self.db['address'].find_one({"address.full": address})
+        categories = self.db['categories'].find_one({}, {"_id": 0})
+        categories_synonyms = []
+        for category in requested_categories:
+            for main_category, sub_categories in categories.items():
+                if sub_categories.get(category):
+                    categories_synonyms.extend(sub_categories.get(category))
+
         try:
             result_dict = {
                 'request': {
@@ -69,7 +76,7 @@ class MongoDatabase:
             points_of_interests = address_document.get('points_of_interest', {})
 
             for amenity_name, amenities_list in points_of_interests.items():
-                if amenity_name not in categories:
+                if amenity_name not in categories_synonyms:
                     continue
                 extracted_amenities = [
                     {
@@ -86,10 +93,17 @@ class MongoDatabase:
                 result_dict['osm']['points_of_interest'][amenity_name.capitalize()] = extracted_amenities
         return result_dict
 
-    def get_categories(self, partial_name: str):
-        categories_cursor = self.db['categories'].find()
-        categories_list = list(categories_cursor)
-        return categories_list
+    def get_categories(self, partial_name: str=None):
+        data = self.db['categories'].find_one({}, {'_id': 0})
+        res = {}
+        for main_key, sub_keys in data.items():
+            for sub_key, _ in sub_keys.items():
+                if not res.get(main_key):
+                    res[main_key] = []
+                res[main_key].append(sub_key)
+        return res
 
     def _create_index_for_location(self):
         result = self.db['address'].create_index([("location", "2dsphere")])
+
+
