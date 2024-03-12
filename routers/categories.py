@@ -22,6 +22,6 @@ def get_database():
     return MongoDatabase()
 
 
-@app.get("/")
+@router.get("/")
 async def get_categories(partial_name: str = None, database: MongoDatabase = Depends(get_database)):
     return database.get_categories(partial_name)

@@ -4,7 +4,6 @@ from fastapi import APIRouter
 from database.mongo_database import MongoDatabase
 from database.get_database import get_database
 from fastapi import FastAPI, HTTPException
-from main import app
 router = APIRouter()
 APP_URL = 'https://api.cityinminutes.me/'
 
@@ -20,7 +19,7 @@ class ReportUrl:
         return f"{APP_URL}?report={self.address}&cat=joga"
 
 
-@app.get("/")
+@router.get("/")
 async def get_address(name: str=None, database: MongoDatabase = Depends(get_database)):
     results = database.search_by_partial_name(name)
     results_with_url = []
