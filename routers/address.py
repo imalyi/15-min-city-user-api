@@ -4,6 +4,7 @@ from fastapi import APIRouter
 from database.mongo_database import MongoDatabase
 from database.get_database import get_database
 from fastapi import FastAPI, HTTPException
+
 router = APIRouter()
 APP_URL = 'https://api.cityinminutes.me/'
 

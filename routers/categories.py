@@ -4,10 +4,9 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 from fastapi import APIRouter
 from database.mongo_database import MongoDatabase
-from main import app
+
 
 logging.basicConfig(level=logging.INFO)
-app = FastAPI()
 
 app.add_middleware(middleware_class=CORSMiddleware,
     allow_origins=['*'],
