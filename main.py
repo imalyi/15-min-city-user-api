@@ -9,7 +9,7 @@ from routers import address
 from mangum import Mangum
 
 
-app = FastAPI()
+app = FastAPI(root_path="/api/",)
 
 app.include_router(report.router, prefix='/report', tags=['Report'])
 app.include_router(categories.router, prefix="/categories", tags=["Categories"])
