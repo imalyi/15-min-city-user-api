@@ -1,21 +1,9 @@
-FROM python:3.11
-
-ENV DockerHOME=/home/apps/15min-user-api/
-
-RUN mkdir -p $DockerHOME
-
-RUN apt-get update -y -q
-RUN apt-get install python3-dev default-libmysqlclient-dev build-essential -y -q
-
-WORKDIR $DockerHOME
-
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-
-RUN pip install --upgrade pip
-
-COPY . $DockerHOME
-RUN pip install -r requirements.txt
-EXPOSE 8001
-
+FROM public.ecr.aws/lambda/python:3.10
+# Copy function code
+COPY ./app ${LAMBDA_TASK_ROOT}
+# Install the function's dependencies using file requirements.txt
+# from your project folder.
+COPY requirements.txt .
+RUN pip3 install -r requirements.txt - target "${LAMBDA_TASK_ROOT}" -U - no-cache-dir
+# Set the CMD to your handler (could also be done as a parameter override outside of the Dockerfile)
 CMD ["main.handler"]
