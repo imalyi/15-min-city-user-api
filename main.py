@@ -22,7 +22,7 @@ app.include_router(address.router, prefix="/address", tags=["Address"])
 #    allow_headers=["*"],)
 
 
-#handler = Mangum(app)
+handler = Mangum(app)
 
 
 if __name__ == "__main__":
