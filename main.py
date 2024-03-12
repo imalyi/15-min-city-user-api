@@ -15,12 +15,6 @@ app.include_router(report.router, prefix='/report', tags=['Report'])
 app.include_router(categories.router, prefix="/categories", tags=["Categories"])
 app.include_router(address.router, prefix="/address", tags=["Address"])
 
-#app.add_middleware(middleware_class=CORSMiddleware,
-#    allow_origins=['*'],
-#    allow_credentials=True,
-#    allow_methods=["*"],
-#    allow_headers=["*"],)
-
 
 handler = Mangum(app)
 
