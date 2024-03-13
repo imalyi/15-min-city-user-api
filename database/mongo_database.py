@@ -100,7 +100,7 @@ class MongoDatabase:
             for sub_key, _ in sub_keys.items():
                 if not res.get(main_key):
                     res[main_key] = []
-                res[main_key].append(sub_key)
+                res[main_key].append({'name': sub_key})
         return res
 
     def _create_index_for_location(self):
