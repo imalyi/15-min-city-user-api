@@ -10,6 +10,12 @@ logging.basicConfig(level=logging.INFO)
 
 router = APIRouter()
 
+
 @router.get("/")
 async def get_categories(partial_name: str = None, database: MongoDatabase = Depends(get_database)):
-    return database.get_categories(partial_name)
+    res = {}
+    for category, sub_categories in database.get_categories(partial_name).items():
+        res[category] = []
+        for sub_category in sub_categories:
+            res[category].append({'name': sub_category})
+    return res

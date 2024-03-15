@@ -53,57 +53,44 @@ class MongoDatabase:
 
     def get_report(self, address: str, requested_categories: list[str]):
         address_document = self.db['address'].find_one({"address.full": address})
-        categories = self.db['categories'].find_one({}, {"_id": 0})
-        categories_synonyms = []
-        for category in requested_categories:
-            for main_category, sub_categories in categories.items():
-                if sub_categories.get(category):
-                    categories_synonyms.extend(sub_categories.get(category))
-
         try:
             result_dict = {
-                'request': {
-                    'address': address_document.get('address', {}).get('full'),
-                    'location': address_document.get('location')
-                },
-                'osm': {
-                    'points_of_interest': {}
+                'address': address_document['address']['full'],
+                'location': address_document['location'],
+                'points_of_interest': {
                 }
             }
+
         except AttributeError:
             return {}
         if address_document:
             points_of_interests = address_document.get('points_of_interest', {})
 
-            for amenity_name, amenities_list in points_of_interests.items():
-                if amenity_name not in categories_synonyms:
-                    continue
-                extracted_amenities = [
-                    {
-                        'name': amenity.get('name', ''),
-                        'location': amenity.get('location', []),
-                        'distance': amenity.get('distance', -1),
-                        'tags': amenity.get('tags', {}),
-                        'source': amenity.get('source', 'unknown'),
-                        'address': amenity.get('address', {})
-                    }
-                    for amenity in amenities_list
-                ]
-                extracted_amenities.sort(key=lambda x: x['distance'], reverse=False)
-                result_dict['osm']['points_of_interest'][amenity_name.capitalize()] = extracted_amenities
+            for main_amenity, sub_amenities in points_of_interests.items():
+                for sub_amenity_name, pois, in sub_amenities.items():
+                    if sub_amenity_name not in requested_categories:
+                        continue
+                    for poi in pois:
+                        extracted_amenities = [
+                            {
+                                'name': poi.get('name', ''),
+                                'location': poi.get('location', []),
+                                'distance': poi.get('distance', -1),
+                                'tags': poi.get('tags', {}),
+                                'source': poi.get('source', 'unknown'),
+                                'address': poi.get('address', {})
+                            }
+                            for amenity in sub_amenities
+                        ]
+                        extracted_amenities.sort(key=lambda x: x['distance'], reverse=False)
+                        result_dict['points_of_interest'][main_amenity] = {}
+                        result_dict['points_of_interest'][main_amenity][sub_amenity_name.capitalize()] = extracted_amenities
         return result_dict
 
     def get_categories(self, partial_name: str=None):
         data = self.db['categories'].find_one({}, {'_id': 0})
-        res = {}
-        for main_key, sub_keys in data.items():
-            for sub_key, _ in sub_keys.items():
-                if not res.get(main_key):
-                    res[main_key] = []
-                res[main_key].append({'name': sub_key})
-        return res
+        return data
 
     def _create_index_for_location(self):
         result = self.db['address'].create_index([("location", "2dsphere")])
-
 
