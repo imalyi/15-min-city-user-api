@@ -6,11 +6,7 @@ import logging
 
 logger = logging.getLogger(f"{__name__}_Database")
 
-MONGO_DB_HOST = os.environ.get("MONGO_DB_HOST", "cluster0.eof3k8h.mongodb.net")
-MONGO_DB_PORT = os.environ.get("MONGO_DB_PORT", 28017)
 MONGO_DB_NAME = os.environ.get("MONGO_DB_NAME", '15min')
-MONGO_DB_USERNAME = os.environ.get("MONGO_DB_USERNAME", '2wtarX4YfclfC4t3')
-MONGO_DB_PASSWORD = os.environ.get("MONGO_DB_PASSWORD", 'Spx9X6Hb7tDWidVS')
 MONGO_CONNECT = os.environ.get("MONGO_CONNECT", f"mongodb+srv://2wtarX4YfclfC4t3:Spx9X6Hb7tDWidVS@cluster0.eof3k8h.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 
 
@@ -54,7 +50,7 @@ class MongoDatabase:
     def get_report(self, address: str, requested_categories: list[str]):
         address_document = self.db['address'].find_one({"address.full": address})
         try:
-            result_dict = {
+            result = {
                 'address': address_document['address']['full'],
                 'location': address_document['location'],
                 'points_of_interest': {
@@ -63,29 +59,13 @@ class MongoDatabase:
 
         except AttributeError:
             return {}
-        if address_document:
-            points_of_interests = address_document.get('points_of_interest', {})
-
-            for main_amenity, sub_amenities in points_of_interests.items():
-                for sub_amenity_name, pois, in sub_amenities.items():
-                    if sub_amenity_name not in requested_categories:
-                        continue
-                    for poi in pois:
-                        extracted_amenities = [
-                            {
-                                'name': poi.get('name', ''),
-                                'location': poi.get('location', []),
-                                'distance': poi.get('distance', -1),
-                                'tags': poi.get('tags', {}),
-                                'source': poi.get('source', 'unknown'),
-                                'address': poi.get('address', {})
-                            }
-                            for amenity in sub_amenities
-                        ]
-                        extracted_amenities.sort(key=lambda x: x['distance'], reverse=False)
-                        result_dict['points_of_interest'][main_amenity] = {}
-                        result_dict['points_of_interest'][main_amenity][sub_amenity_name.capitalize()] = extracted_amenities
-        return result_dict
+        for main_category, sub_categories in address_document.get('points_of_interest', {}).items():
+            for requested_category in requested_categories:
+                if requested_category in sub_categories:
+                    if not result['points_of_interest'].get(main_category):
+                        result['points_of_interest'][main_category] = {}
+                    result['points_of_interest'][main_category][requested_category] = sub_categories[requested_category]
+        return result
 
     def get_categories(self, partial_name: str=None):
         data = self.db['categories'].find_one({}, {'_id': 0})
