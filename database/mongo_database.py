@@ -1,3 +1,4 @@
+import json
 import re
 from pymongo import MongoClient
 from pymongo.errors import ServerSelectionTimeoutError
@@ -47,7 +48,7 @@ class MongoDatabase:
         result = self.db['address'].find(query).limit(10)
         return [{"address": doc.get('address', {}).get('full'), "id": str(doc.get('_id'))} for doc in result]
 
-    def get_report(self, address: str, requested_categories: list[str]):
+    def get_report(self, address: str, requested_categories: list[str], filtered_categories: list[dict]):
         address_document = self.db['address'].find_one({"address.full": address})
         try:
             result = {
@@ -74,3 +75,18 @@ class MongoDatabase:
     def _create_index_for_location(self):
         result = self.db['address'].create_index([("location", "2dsphere")])
 
+    def search_object_by_partial_name(self, name: str) -> list:
+        queries = [{"name": {"$regex": re.compile(f'.*{part}.*', re.IGNORECASE)}} for part in name.split()]
+        try:
+            result = self.db['pois_names'].find({"$and": queries}).limit(5)
+        except Exception as e:
+            logger.error(f"Error executing MongoDB query: {e}")
+            return []
+
+        return [{'name': doc.get('name'), 'category': doc.get('category'), 'sub_category': doc.get('sub_category')} for doc in result]
+
+
+m = MongoDatabase()
+a = (m.get_report('Aleja Grunwaldzka 195/197, Gdańsk', ['Fast Food'], filtered_categories=[{}]))
+a = json.dumps(a, indent=4)
+print(a)
