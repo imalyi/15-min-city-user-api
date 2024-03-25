@@ -1,14 +1,29 @@
 from fastapi import Depends
-from fastapi import APIRouter, Query
+from fastapi import APIRouter
 from database.mongo_database import MongoDatabase
 from database.get_database import get_database
-from fastapi import FastAPI, HTTPException
+from fastapi import HTTPException
+from .googlemaps_distance_calculator import GoogleMapsDistanceCalculator
+from pydantic import BaseModel
+from typing import List, Dict, Optional
+
 router = APIRouter()
 
 
-@router.get('/')
-async def get_report(address: str, cat: list[str] = Query(...), database: MongoDatabase = Depends(get_database)):
-    data = database.get_report(address, cat)
+class Report(BaseModel):
+    address: str
+    categories: List[Dict]
+    requested_objects: Optional[List[Dict]] = []
+    requested_addresses: Optional[List] = []
+
+
+@router.post('/')
+async def get_report(report: Report, database: MongoDatabase = Depends(get_database)):
+    data = database.get_report(report.address, report.categories, report.requested_objects, report.requested_addresses)
+    gmaps = GoogleMapsDistanceCalculator(from_=report.address)
+    for address in report.requested_addresses:
+        if data['custom_addresses'][address]:
+            data['custom_addresses'][address]['commute_time'] = gmaps.calc(to=address)
     if not data:
         raise HTTPException(status_code=404, detail="Address not found")
     return data
