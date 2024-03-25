@@ -1,3 +1,5 @@
+import os
+
 import requests
 import datetime
 
@@ -5,7 +7,7 @@ import datetime
 url = 'https://routes.googleapis.com/directions/v2:computeRoutes'
 headers = {
     'Content-Type': 'application/json',
-    'X-Goog-Api-Key': 'AIzaSyBguG5Bp69BRtPBhj6ziRimz6wl3sXIvWc',
+    'X-Goog-Api-Key': os.getenv("GOOGLE_API_KEY"),
     'X-Goog-FieldMask': 'routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline'
 }
 
@@ -39,6 +41,7 @@ class GoogleMapsDistanceCalculatorWalk(GoogleMapsDistanceCalculatorGeneric):
             "units": "IMPERIAL"
         }
 
+
 class GoogleMapsDistanceCalculatorBike(GoogleMapsDistanceCalculatorGeneric):
     def __init__(self, from_, to):
         formatted_datetime = (datetime.datetime.now()).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
@@ -61,7 +64,6 @@ class GoogleMapsDistanceCalculatorBike(GoogleMapsDistanceCalculatorGeneric):
             "languageCode": "en-US",
             "units": "IMPERIAL"
         }
-
 
 
 class GoogleMapsDistanceCalculatorCar(GoogleMapsDistanceCalculatorGeneric):
@@ -87,7 +89,6 @@ class GoogleMapsDistanceCalculatorCar(GoogleMapsDistanceCalculatorGeneric):
             "languageCode": "en-US",
             "units": "IMPERIAL"
         }
-
 
 
 class GoogleMapsDistanceCalculatorPublicTransport(GoogleMapsDistanceCalculatorGeneric):
