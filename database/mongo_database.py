@@ -8,7 +8,7 @@ import logging
 logger = logging.getLogger(f"{__name__}_Database")
 
 MONGO_DB_NAME = os.environ.get("MONGO_DB_NAME", '15min')
-MONGO_CONNECT = os.environ.get("MONGO_CONNECT", f"mongodb+srv://2wtarX4YfclfC4t3:Spx9X6Hb7tDWidVS@cluster0.eof3k8h.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+MONGO_CONNECT = os.environ.get("MONGO_CONNECT")
 
 
 class MongoDatabase:
@@ -90,16 +90,4 @@ class MongoDatabase:
         return [{'name': doc.get('name'), 'category': doc.get('category'), 'sub_category': doc.get('sub_category')} for doc in result]
 
 
-def test():
-    m = MongoDatabase()
-    a = (m.get_report('Aleja Grunwaldzka 195/197, Gdańsk', [{'main_category': 'Gastronomia', 'category': 'Fast Food'}, {'main_category': 'Sport', 'category': 'Hobby, open space'}  ],
 
-
-                      requested_objects=[{'main_category': 'Gastronomia', 'category': 'Fast Food', 'name': 'Aleppo Bar'},
-                                         {'main_category': 'Gastronomia', 'category': 'puby i bary', 'name': 'Fornetti'}],
-                      requested_addresses=['Żabi Kruk 1, Gdańsk', 'Aleja Grunwaldzka 195/197, Gdańsk']))
-    a = json.dumps(a, indent=4)
-
-    print(a)
-
-test()
