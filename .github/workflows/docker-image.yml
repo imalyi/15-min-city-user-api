@@ -37,6 +37,6 @@ jobs:
       - name: Deploy Stage
         uses: fjogeleit/http-request-action@v1
         with:
-          url: 'https://portainer.1213213.xyz/api/stacks/webhooks/7cab9297-ba19-497c-adfa-be024f09775c'
+          url: 'https://portainer.1213213.xyz/api/stacks/webhooks/54c5a749-fe58-40bb-ade0-fc86603491df'
           method: 'POST'
           preventFailureOnNoResponse: true
