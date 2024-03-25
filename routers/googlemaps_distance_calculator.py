@@ -15,7 +15,9 @@ headers = {
 class GoogleMapsDistanceCalculatorGeneric:
     def calc(self):
         res = requests.post(url, headers=headers, json=self.data)
-        return (int(res.json().get('routes')[0].get('duration').replace('s', '')))
+        duration = (int(res.json().get('routes')[0].get('duration').replace('s', '')))
+        distance = (int(res.json().get('routes')[0].get('distanceMeters')))
+        return {'distance': distance, 'duration': duration}
 
 
 class GoogleMapsDistanceCalculatorWalk(GoogleMapsDistanceCalculatorGeneric):
