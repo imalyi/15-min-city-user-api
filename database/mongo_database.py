@@ -4,13 +4,12 @@ from pymongo import MongoClient
 from pymongo.errors import ServerSelectionTimeoutError
 import os
 import logging
+from models.report import AddressIn
 
 logger = logging.getLogger(f"{__name__}_Database")
 
 MONGO_DB_NAME = os.environ.get("MONGO_DB_NAME", '15min')
-MONGO_CONNECT = os.environ.get("MONGO_CONNECT")
-
-
+MONGO_CONNECT = os.environ.get("MONGO_CONNECT", "mongodb://root:example@node:27017/")
 class MongoDatabase:
     def __init__(self):
         self.__connect()
@@ -72,7 +71,7 @@ class MongoDatabase:
             custom_addresses[address] = address_document
         return custom_addresses
 
-    def get_categories(self, partial_name: str=None):
+    def get_categories(self):
         data = self.db['categories'].find_one({}, {'_id': 0})
         return data
 

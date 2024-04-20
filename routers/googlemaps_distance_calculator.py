@@ -7,7 +7,7 @@ import datetime
 url = 'https://routes.googleapis.com/directions/v2:computeRoutes'
 headers = {
     'Content-Type': 'application/json',
-    'X-Goog-Api-Key': os.getenv("GOOGLE_API_KEY"),
+    'X-Goog-Api-Key': os.getenv("GOOGLE_API_KEY", "AIzaSyBguG5Bp69BRtPBhj6ziRimz6wl3sXIvWc"),
     'X-Goog-FieldMask': 'routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline'
 }
 
@@ -22,8 +22,7 @@ class GoogleMapsDistanceCalculatorGeneric:
 
 class GoogleMapsDistanceCalculatorWalk(GoogleMapsDistanceCalculatorGeneric):
     def __init__(self, from_, to):
-        formatted_datetime = (datetime.datetime.now()).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
-
+        formatted_datetime = (datetime.datetime.now() + datetime.timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
         self.data = {
             "origin": {
                 "address": from_
