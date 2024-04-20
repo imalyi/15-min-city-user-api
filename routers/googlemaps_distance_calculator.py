@@ -22,8 +22,7 @@ class GoogleMapsDistanceCalculatorGeneric:
 
 class GoogleMapsDistanceCalculatorWalk(GoogleMapsDistanceCalculatorGeneric):
     def __init__(self, from_, to):
-        formatted_datetime = (datetime.datetime.now()).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
-
+        formatted_datetime = (datetime.datetime.now() + datetime.timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
         self.data = {
             "origin": {
                 "address": from_
