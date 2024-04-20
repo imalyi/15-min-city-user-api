@@ -1,4 +1,3 @@
-import json
 import re
 from pymongo import MongoClient
 from pymongo.errors import ServerSelectionTimeoutError
@@ -10,6 +9,7 @@ logger = logging.getLogger(f"{__name__}_Database")
 
 MONGO_DB_NAME = os.environ.get("MONGO_DB_NAME", '15min')
 MONGO_CONNECT = os.environ.get("MONGO_CONNECT", "mongodb://root:example@node:27017/")
+
 class MongoDatabase:
     def __init__(self):
         self.__connect()
@@ -37,6 +37,7 @@ class MongoDatabase:
         document = self.db['address'].find_one({"address.full": address}, filter)
         document['custom_objects'] = self.__fetch_custom_objects_for_report(address, requested_objects)
         document['custom_addresses'] = self.__fetch_custom_addresses_for_report(requested_addresses)
+        print(document)
         return document
 
     def __generate_filters_for_report(self, requested_categories: list[dict]):

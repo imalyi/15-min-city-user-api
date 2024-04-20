@@ -25,6 +25,4 @@ async def get_report(report: Report, database: MongoDatabase = Depends(get_datab
     for address in report.requested_addresses:
         if data['custom_addresses'][address]:
             data['custom_addresses'][address]['commute_time'] = gmaps.calc(to=address)
-
-    print(data)
     return data

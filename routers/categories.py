@@ -6,7 +6,7 @@ from fastapi import APIRouter
 from database.mongo_database import MongoDatabase
 from database.get_database import get_database
 from models.report import Categories
-from typing import List
+from typing import List, Dict
 
 logging.basicConfig(level=logging.INFO)
 
@@ -14,5 +14,5 @@ router = APIRouter()
 
 
 @router.get("/")
-async def get_categories(database: MongoDatabase = Depends(get_database)):
-    return Categories(categories=database.get_categories())
+async def get_categories(database: MongoDatabase = Depends(get_database)) -> Dict[str, List]:
+    return database.get_categories()

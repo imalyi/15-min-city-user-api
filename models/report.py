@@ -62,6 +62,16 @@ class ReportOut(BaseModel):
     address: AddressOut
     location: list[float]
     points_of_interest: Dict[str, Dict[str, List[PointOfInterest]]]
-    custom_addresses: dict[str, CustomAddress]
+    custom_addresses: Dict[str, CustomAddress]
+    custom_objects: Dict[str, Dict[str, list[PointOfInterest]]]
 
 
+
+class Object_(BaseModel):
+    name: str
+    category: str
+    sub_category: str
+
+class Objects(BaseModel):
+    objects: List[Object_]
+    addresses: List[str]
