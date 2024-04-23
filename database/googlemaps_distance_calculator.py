@@ -7,7 +7,7 @@ import datetime
 url = 'https://routes.googleapis.com/directions/v2:computeRoutes'
 headers = {
     'Content-Type': 'application/json',
-    'X-Goog-Api-Key': os.getenv("GOOGLE_API_KEY"),
+    'X-Goog-Api-Key': os.getenv("GOOGLE_API_KEY", "AIzaSyBguG5Bp69BRtPBhj6ziRimz6wl3sXIvWc"),
     'X-Goog-FieldMask': 'routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline'
 }
 

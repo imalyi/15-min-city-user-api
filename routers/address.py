@@ -7,6 +7,7 @@ from fastapi import FastAPI, HTTPException
 from database.model import AddressIn, AddressOut
 from typing import List
 from database.es import fuzzy_search
+
 router = APIRouter()
 
 @router.get("/")
