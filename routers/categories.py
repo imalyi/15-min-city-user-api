@@ -14,9 +14,9 @@ router = APIRouter()
 
 
 @router.get("/")
-async def get_categories(partial_name: str = None, database: MongoDatabase = Depends(get_database)):
+async def get_categories(database: MongoDatabase = Depends(get_database)):
     res = {}
-    for category, sub_categories in database.get_categories(partial_name).items():
+    for category, sub_categories in database.get_categories().items():
         res[category] = []
         for sub_category in sub_categories:
             res[category].append({'name': sub_category})
