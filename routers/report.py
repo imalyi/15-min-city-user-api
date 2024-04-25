@@ -13,13 +13,13 @@ router = APIRouter()
 
 class Report(BaseModel):
     address: str
-    categories: List[Dict]
+    categories: Optional[List[Dict]] = []
     requested_objects: Optional[List[Dict]] = []
     requested_addresses: Optional[List] = []
 
 
 @router.post('/')
-async def get_report(report: Report, database: MongoDatabase = Depends(get_database)) -> ReportOut:
+async def get_report(report: Report, database: MongoDatabase = Depends(get_database)):
     data = database.get_report(report.address, report.categories, report.requested_objects, report.requested_addresses)
     gmaps = GoogleMapsDistanceCalculator(from_=report.address)
     for address in report.requested_addresses:

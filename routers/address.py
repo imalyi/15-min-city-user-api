@@ -9,6 +9,6 @@ from typing import List
 router = APIRouter()
 
 @router.get("/")
-async def get_address(q: AddressIn = Depends(), database: MongoDatabase = Depends(get_database)) -> List[str]:
+async def get_address(q: AddressIn = Depends(), database: MongoDatabase = Depends(get_database)):
     results = database.search_by_partial_name(q.name)
     return results
