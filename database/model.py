@@ -20,13 +20,6 @@ class RequestedObject(BaseModel):
     name: str
     category: Category
 
-class ReportIn(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    address: AddressIn
-    categories: list[Category]
-    requested_objects: list[RequestedObject]
-    requested_address: list[AddressIn]
-
 
 #---------------------------------------------
 
@@ -71,22 +64,21 @@ class CustomAddress(BaseModel):
     location: List[float]
     commute_time: CommuteTime
 
-
 class ReportOut(BaseModel):
     model_config = ConfigDict(extra="forbid")
     address: AddressOut
     location: list[float]
-    points_of_interest: Dict[str, Dict[str, List[PointOfInterest]]] | None
-    custom_addresses: List[CustomAddress] | None
-    custom_objects: Dict[str, Dict[str, list[PointOfInterest]]] | None
+    points_of_interest: Dict[str, Dict[str, List[PointOfInterest]]] | None = []
+    custom_addresses: List[CustomAddress] | None = []
+    custom_objects: Dict[str, Dict[str, list[PointOfInterest]]] | None = []
 
 
 class ReportRequest(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", validate_default=False)
     address: str
-    categories: List[Category]
-    requested_objects: Optional[List[Dict]]
-    requested_addresses: Optional[List]
+    categories: Optional[List[Category]] = []
+    requested_objects: Optional[List[Dict]] = []
+    requested_addresses: Optional[List] = []
 
 
 
