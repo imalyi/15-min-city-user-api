@@ -64,13 +64,26 @@ class CustomAddress(BaseModel):
     location: List[float]
     commute_time: CommuteTime
 
+
 class ReportOut(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    address: AddressOut
-    location: list[float]
+    address: Optional[AddressOut] = []
+    location: Optional[list[float]]
     points_of_interest: Dict[str, Dict[str, List[PointOfInterest]]] | None = []
     custom_addresses: List[CustomAddress] | None = []
     custom_objects: Dict[str, Dict[str, list[PointOfInterest]]] | None = []
+
+
+class Language(Enum):
+    pl = "pl"
+    en = "en"
+    de = "de"
+
+
+class SavedReportsOut(BaseModel):
+    language: Language
+    secret: str
+    reports: Optional[List[ReportOut]] | None = []
 
 
 class ReportRequest(BaseModel):
@@ -93,19 +106,15 @@ class Objects(BaseModel):
     objects: List[Object_]
     addresses: List[str]
 
-class Language(Enum):
-    pl = "pl"
-    en = "en"
-    de = "de"
 
 class UserDataIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
     secret: str
     language: Language
-    addresses: List[str] = []
+    addresses: Optional[List[str]] = []
     requested_objects: Optional[List[Dict]] = []
     requested_addresses: Optional[List] = []
-    categories: List[Dict]
+    categories: Optional[List[Dict]] = []
 
     @field_serializer("language")
     def serialize_language(self, value):

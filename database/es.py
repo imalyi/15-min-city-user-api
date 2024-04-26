@@ -1,7 +1,7 @@
 import os
 from opensearchpy import OpenSearch
 
-OPENSEARCH_HOST = os.getenv("OPENSEARCH_HOST", "node")
+OPENSEARCH_HOST = os.getenv("OPENSEARCH_HOST", "192.168.0.105")
 OPENSEARCH_PORT = os.getenv("OPENSEARCH_PORT", 9200)
 OPENSEARCH_USER = os.getenv("OPENSEARCH_USER", "admin")
 OPENSEARCH_PASSWORD = os.getenv("OPENSEARCH_PASSWORD", "admin")

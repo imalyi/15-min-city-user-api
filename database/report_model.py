@@ -1,4 +1,4 @@
-from .model import UserDataIn, UserDataIn, ReportRequest, ReportOut
+from .model import UserDataIn, UserDataIn, ReportRequest, ReportOut, SavedReportsOut
 from pydantic import ValidationError
 from .googlemaps_distance_calculator import GoogleMapsDistanceCalculator
 from typing import List
@@ -9,6 +9,8 @@ class ReportModel:
         self._db = MongoDatabase().db
 
     def save_report(self, report: UserDataIn):
+        print(report)
+        self._db['user_data'].delete_one({"secret": report.get('secret')})
         self._db['user_data'].insert_one(report)
 
     def load_report_by_id(self, secret: str):
@@ -22,7 +24,7 @@ class ReportModel:
                 requested_addresses=user_request.get("requested_addresses")
             )
             data.append(self.get_report(report_request.model_dump()))
-        return data
+        return SavedReportsOut(language=user_request.get('language'), secret=user_request.get("secret"), reports=data)
 
     def get_report(self, requested_report: ReportRequest) -> dict:
         filter_ = self.__generate_filters_for_report(requested_report.get('categories'))
@@ -75,17 +77,9 @@ class ReportGenerator:
         return self._model.get_report(requested_report)
 
     def save(self, user_data: UserDataIn) -> None:
-        try:
-            UserDataIn.model_validate(user_data)
-            self._model.save_report(user_data)
-        except ValidationError as err:
-            print(err)
-
-    def load(self, secret: str) -> List[ReportOut]:
-        try:
-            data = self._model.load_report_by_id(secret)
-            for row in data:
-                ReportOut.model_validate(row)
-            return data
-        except ValidationError as err:
-            print(err.errors())
+        UserDataIn.model_validate(user_data)
+        self._model.save_report(user_data)
+    
+    def load(self, secret: str) -> SavedReportsOut:
+        data = self._model.load_report_by_id(secret)
+        return data
