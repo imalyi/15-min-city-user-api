@@ -79,12 +79,24 @@ class Language(Enum):
     en = "en"
     de = "de"
 
+class UserDataIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    secret: str
+    language: Language
+    addresses: Optional[List[str]] = []
+    requested_objects: Optional[List[Dict]] = []
+    requested_addresses: Optional[List] = []
+    categories: Optional[List[Dict]] = []
+
+    @field_serializer("language")
+    def serialize_language(self, value):
+        return value.value
 
 class SavedReportsOut(BaseModel):
     language: Language
     secret: str
     reports: Optional[List[ReportOut]] | None = []
-
+    request: UserDataIn
 
 class ReportRequest(BaseModel):
     model_config = ConfigDict(extra="forbid", validate_default=False)
@@ -107,15 +119,3 @@ class Objects(BaseModel):
     addresses: List[str]
 
 
-class UserDataIn(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    secret: str
-    language: Language
-    addresses: Optional[List[str]] = []
-    requested_objects: Optional[List[Dict]] = []
-    requested_addresses: Optional[List] = []
-    categories: Optional[List[Dict]] = []
-
-    @field_serializer("language")
-    def serialize_language(self, value):
-        return value.value

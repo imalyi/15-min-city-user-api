@@ -24,7 +24,7 @@ class ReportModel:
                 requested_addresses=user_request.get("requested_addresses")
             )
             data.append(self.get_report(report_request.model_dump()))
-        return SavedReportsOut(language=user_request.get('language'), secret=user_request.get("secret"), reports=data)
+        return SavedReportsOut(language=user_request.get('language'), secret=user_request.get("secret"), reports=data, request=user_request)
 
     def get_report(self, requested_report: ReportRequest) -> dict:
         filter_ = self.__generate_filters_for_report(requested_report.get('categories'))
@@ -83,3 +83,6 @@ class ReportGenerator:
     def load(self, secret: str) -> SavedReportsOut:
         data = self._model.load_report_by_id(secret)
         return data
+
+
+ReportModel().load_report_by_id("15mintest")
