@@ -2,7 +2,7 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "v2" ]
   workflow_dispatch: 
 
 jobs:
@@ -33,10 +33,3 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          
-      - name: Deploy Stage
-        uses: fjogeleit/http-request-action@v1
-        with:
-          url: 'https://portainer.1213213.xyz/api/stacks/webhooks/45975426-42be-418f-85ae-e19ccd82a9f5'
-          method: 'POST'
-          preventFailureOnNoResponse: true
