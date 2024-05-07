@@ -7,10 +7,24 @@ from fastapi import FastAPI, HTTPException
 from database.model import AddressIn, AddressOut
 from typing import List
 from database.es import fuzzy_search
+import os
+
 
 router = APIRouter()
 
+
+def get_search_engine(name: str):
+    try:
+        search_engine = os.getenv("SEARCH_ENGINE").lower() 
+    except AttributeError:
+        search_engine = 'mongo'
+        
+    if search_engine == 'mongo':
+        return MongoDatabase().search_by_partial_name(name)
+    if search_engine == 'opensearch':
+        return fuzzy_search(name)
+
 @router.get("/")
 async def get_address(q: AddressIn = Depends(), database: MongoDatabase = Depends(get_database)) -> List[str]:
-    results = fuzzy_search(q.name)
+    results = get_search_engine(q.name)
     return results
