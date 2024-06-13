@@ -106,7 +106,6 @@ class ReportRequest(BaseModel):
     requested_addresses: Optional[List] = []
 
 
-
 class Object_(BaseModel):
     model_config = ConfigDict(extra="forbid")
     name: str

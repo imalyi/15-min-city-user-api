@@ -6,6 +6,8 @@ from routers import categories
 from routers import address
 from routers import object
 from routers import user
+from routers import heatmap
+
 from starlette.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -21,6 +23,7 @@ app.include_router(categories.router, prefix="/categories", tags=["Categories"])
 app.include_router(address.router, prefix="/address", tags=["Address"])
 app.include_router(object.router, prefix="/object", tags=["Objects"])
 app.include_router(user.router, prefix="/user", tags=["User"])
+app.include_router(heatmap.router, prefix='/heatmap', tags=['Heat Map'])
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8001)
