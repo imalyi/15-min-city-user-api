@@ -2,7 +2,7 @@ from pydantic import ValidationError
 from typing import List
 from .mongo_database import MongoDatabase 
 from .model import Category
-
+import geojson
 from scipy.spatial import ConvexHull
 import numpy as np
 
@@ -24,15 +24,22 @@ class HeatMapModel:
 
         coords = []
         for document in results:
-            coords.append(document.get('location'))
+            coords.append([document.get('location')[0], document.get('location')[1]])
+        
         points = np.array(coords)
         hull = ConvexHull(points)
-        hull_points = points[hull.vertices]
-        return hull_points.tolist()
+        hull_points = points[hull.vertices].tolist()
+        hull_points.append(hull_points[0])
+        polygon = geojson.Feature(geometry=geojson.Polygon([hull_points]), properties={"name": "Sample Polygon"})
+        feature_collection = geojson.FeatureCollection([polygon])
+        geojson_dict = geojson.loads(geojson.dumps(feature_collection))
+
+
+        return geojson_dict
 
 
 
 
  
-#h = HeatMapModel()
-#h.generate([Category(main_category='Transport', category='Rowery MEVO')])
+h = HeatMapModel()
+h.generate([Category(main_category='Transport', category='Rowery MEVO')])

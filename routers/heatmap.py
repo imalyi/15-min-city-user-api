@@ -15,6 +15,6 @@ router = APIRouter()
 
 
 @router.get("/")
-async def get_address(categories: list[Category], database: MongoDatabase = Depends(get_database)):
+async def generate_heatmap(categories: list[Category], database: MongoDatabase = Depends(get_database)):
     h = HeatMapModel()
     return h.generate(categories)
