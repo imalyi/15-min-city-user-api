@@ -13,12 +13,10 @@ class HeatMapModel:
 
     def generate(self, requeired_categories: list[Category]):
         required_fields = []
+        conditions = {}
         for c in requeired_categories:
             required_fields.append(f"{c.main_category}.{c.category}")
-
-        conditions = {
-            'points_of_interest.Zdrowie.Apteki': {"$exists": True, "$ne": []}
-        }
+            conditions[f"points_of_interest.{c.main_category}.{c.category}"] = {"$exists": True, "$ne": []}
 
         results = self._db['address'].find(conditions)
 
@@ -26,20 +24,18 @@ class HeatMapModel:
         for document in results:
             coords.append([document.get('location')[0], document.get('location')[1]])
         
+
         points = np.array(coords)
-        hull = ConvexHull(points)
-        hull_points = points[hull.vertices].tolist()
-        hull_points.append(hull_points[0])
-        polygon = geojson.Feature(geometry=geojson.Polygon([hull_points]), properties={"name": "Sample Polygon"})
-        feature_collection = geojson.FeatureCollection([polygon])
-        geojson_dict = geojson.loads(geojson.dumps(feature_collection))
-
-
-        return geojson_dict
-
-
-
-
+        
+        if coords:
+            hull = ConvexHull(points)
+            hull_points = points[hull.vertices].tolist()
+            hull_points.append(hull_points[0])
+            polygon = geojson.Feature(geometry=geojson.Polygon([hull_points]), properties={"name": "Sample Polygon"})
+            feature_collection = geojson.FeatureCollection([polygon])
+            geojson_dict = geojson.loads(geojson.dumps(feature_collection))
+            return geojson_dict
+        return None
  
-h = HeatMapModel()
-h.generate([Category(main_category='Transport', category='Rowery MEVO')])
+#h = HeatMapModel()
+#h.generate([Category(main_category='Zdrowie', category='Apteki')])

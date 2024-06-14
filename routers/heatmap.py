@@ -13,8 +13,7 @@ from database.heatmap_model import HeatMapModel
 
 router = APIRouter()
 
-
-@router.get("/")
+@router.post("/")
 async def generate_heatmap(categories: list[Category], database: MongoDatabase = Depends(get_database)):
     h = HeatMapModel()
     return h.generate(categories)
