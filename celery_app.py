@@ -61,14 +61,10 @@ def generate_cache_key(categories: List[dict]) -> str:
 
 @celery_app.task
 def generate_heatmap_task(categories):
-    try:
-        h = HeatMapModel()
-        result = h.generate(categories)
-        # Generate cache key from sorted categories
-        cache_key = generate_cache_key(categories)
-        # Store the result in Redis with an expiration time (e.g., 1 hour)
-        redis_client.setex(cache_key, 3600, json.dumps(result))
-        return {"status": "success", "result": result}
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
-    
+    h = HeatMapModel()
+    result = h.generate(categories)
+    # Generate cache key from sorted categories
+    cache_key = generate_cache_key(categories)
+    # Store the result in Redis with an expiration time (e.g., 1 hour)
+    redis_client.setex(cache_key, 3600, json.dumps(result))
+    return {"status": "success", "result": result}
