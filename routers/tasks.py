@@ -1,4 +1,4 @@
-from celery_app import celery_app
+from routers.celery_app import celery_app
 from database.mongo_database import MongoDatabase
 from database.model import Category
 from typing import List
