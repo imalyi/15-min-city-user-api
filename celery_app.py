@@ -50,13 +50,12 @@ class HeatMapModel:
                 print(f"Handled {i} docs")
         feature_collection = geojson.FeatureCollection(features)
         return geojson.loads(geojson.dumps(feature_collection))
-
-
 def generate_cache_key(categories: List[dict]) -> str:
     # Sort the categories list based on the name and value
-    sorted_categories = sorted(categories, key=lambda x: (x['name'], x['value']))
+    sorted_categories = sorted(categories, key=lambda x: (x['main_category'], x['category']))
     # Convert the sorted list to a JSON string to use as the cache key
     return json.dumps(sorted_categories)
+
 
 
 @celery_app.task
