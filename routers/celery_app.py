@@ -19,6 +19,8 @@ celery_app.conf.update(
     enable_utc=True,
 )
 
+celery_app.autodiscover_tasks(['routers'])
+
 
 def ensure_closed_ring(ring):
     if ring[0] != ring[-1]:
@@ -47,7 +49,8 @@ class HeatMapModel:
         feature_collection = geojson.FeatureCollection(features)
         return geojson.loads(geojson.dumps(feature_collection))
 
-@celery_app.task(name="generate_heatmap_task")
+@celery_app.task
 def generate_heatmap_task(categories):
+    print('asfasf')
     #h = HeatMapModel()
     return 1*10000000#h.generate(categories)
