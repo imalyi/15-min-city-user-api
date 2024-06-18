@@ -29,6 +29,7 @@ def generate_cache_key(categories: List[dict]) -> str:
 
 
 
+@router.get("/")
 async def generate_heatmap(categories: List[Category], background_tasks: BackgroundTasks, database: MongoDatabase = Depends(get_database)):
     categories_dict = [category.dict() for category in categories]
     # Generate cache key from sorted categories
