@@ -1,7 +1,9 @@
 from celery import Celery
 import os
-from tasks import generate_heatmap_task
-
+from typing import List
+from database.model import Category
+from database.mongo_database import MongoDatabase
+import geojson
 
 celery_app = Celery(
     'heatmap_worker',

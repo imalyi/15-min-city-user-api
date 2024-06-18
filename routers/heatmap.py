@@ -12,7 +12,7 @@ from celery.result import AsyncResult
 from routers.celery_app import celery_app
 from database.mongo_database import MongoDatabase
 from database.model import Category
-from .tasks import generate_heatmap_task
+from .celery_app import generate_heatmap_task
 
 router = APIRouter()
 
