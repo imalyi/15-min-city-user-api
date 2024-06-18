@@ -35,5 +35,5 @@ class HeatMapModel:
 
 @shared_task(name="generate_heatmap_task")
 def generate_heatmap_task(categories):
-    h = HeatMapModel()
-    return h.generate(categories)
+    #h = HeatMapModel()
+    return 1*10000000#h.generate(categories)
