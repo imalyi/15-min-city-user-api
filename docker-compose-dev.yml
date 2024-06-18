@@ -1,0 +1,69 @@
+version: "3.3"
+services:
+  apiv2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: apiv2
+    restart: always
+    ports:
+      - 8512:8001
+    environment:
+      - TZ=Europe/Warsaw
+      - OPENSEARCH_HOST=opensearch
+      - MONGO_CONNECT=mongodb://root:example@192.168.0.105:27777/
+      - GOOGLE_API_KEY=AIzaSyBguG5Bp69BRtPBhj6ziRimz6wl3sXIvWc
+      - CELERY_BROKER_URL=redis://192.168.0.105:5123/0
+      - CELERY_RESULT_BACKEND=redis://192.168.0.105:5123/0
+    networks:
+      - app-network
+    volumes:
+      - .:/app  # Mount your local code into the container
+
+  redis:
+    container_name: redis
+    image: redis:6.2-alpine
+    networks:
+      - app-network
+    ports:
+      - 5123:6379
+
+  celery_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: celery_worker
+    command: celery -A celery_app worker --loglevel=info
+    environment:
+      - CELERY_BROKER_URL=redis://192.168.0.105:5123/0
+      - CELERY_RESULT_BACKEND=redis://192.168.0.105:5123/0
+      - MONGO_CONNECT=mongodb://root:example@192.168.0.105:27777/
+    depends_on:
+      - apiv2
+      - redis
+    networks:
+      - app-network
+    restart: always
+
+  flower:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: flower
+    command: celery -A celery_app flower --port=5555
+    ports:
+      - 5556:5555
+    environment:
+      - CELERY_BROKER_URL=redis://192.168.0.105:5123/0
+      - CELERY_RESULT_BACKEND=redis://192.168.0.105:5123/0
+    depends_on:
+      - apiv2
+      - redis
+      - celery_worker
+    networks:
+      - app-network
+    restart: always
+
+networks:
+  app-network:
+    driver: bridge
