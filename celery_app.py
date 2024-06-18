@@ -49,6 +49,5 @@ class HeatMapModel:
 
 @celery_app.task
 def generate_heatmap_task(categories):
-    print('asfasf')
     h = HeatMapModel()
     return h.generate(categories)
