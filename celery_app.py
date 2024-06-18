@@ -60,7 +60,7 @@ def generate_cache_key(categories: List[dict]) -> str:
 
 
 @celery_app.task(bind=True)
-def generate_heatmap_task(self, categories):
+def generate_heatmap_task(categories):
     try:
         h = HeatMapModel()
         result = h.generate(categories)
@@ -71,3 +71,4 @@ def generate_heatmap_task(self, categories):
         return {"status": "success", "result": result}
     except Exception as e:
         return {"status": "error", "message": str(e)}
+    
