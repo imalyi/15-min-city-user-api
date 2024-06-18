@@ -19,5 +19,5 @@ router = APIRouter()
 
 @router.post("/")
 async def generate_heatmap(categories: List[Category], background_tasks: BackgroundTasks, database: MongoDatabase = Depends(get_database)):
-    task = generate_heatmap_task.delay(categories[0].model_dump_json())
+    task = generate_heatmap_task.delay(categories)
     return {"task_id": task.id}

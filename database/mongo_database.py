@@ -9,7 +9,6 @@ MONGO_CONNECT = os.environ.get("MONGO_CONNECT", "mongodb://root:example@node:277
 
 logger = logging.getLogger(f"{__name__}_Database")
 
-
 class MongoDatabase:
     def __init__(self):
         self.__connect()
