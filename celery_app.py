@@ -50,20 +50,15 @@ class HeatMapModel:
                 print(f"Handled {i} docs")
         feature_collection = geojson.FeatureCollection(features)
         return geojson.loads(geojson.dumps(feature_collection))
+    
 def generate_cache_key(categories: List[dict]) -> str:
     # Sort the categories list based on the name and value
     sorted_categories = sorted(categories, key=lambda x: (x['main_category'], x['category']))
     # Convert the sorted list to a JSON string to use as the cache key
     return json.dumps(sorted_categories)
 
-
-
 @celery_app.task
 def generate_heatmap_task(categories, *args, **kwargs):
     h = HeatMapModel()
     result = h.generate(categories)
-    # Generate cache key from sorted categories
-    cache_key = generate_cache_key(categories)
-    # Store the result in Redis with an expiration time (e.g., 1 hour)
-    redis_client.setex(cache_key, 3600, json.dumps(result))
-    return {"status": "success", "result": result}
+    return result

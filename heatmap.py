@@ -28,20 +28,22 @@ def generate_cache_key(categories: List[dict]) -> str:
     return json.dumps(sorted_categories)
 
 
-
 @router.post("/")
 async def generate_heatmap(categories: List[Category], background_tasks: BackgroundTasks, database: MongoDatabase = Depends(get_database)):
     categories_dict = [category.model_dump() for category in categories]
     # Generate cache key from sorted categories
     cache_key = generate_cache_key(categories_dict)
     
-    # Check if the result is already in the cache
-    cached_result = redis_client.get(cache_key)
-    if cached_result:
-        return {"status": "success", "result": json.loads(cached_result)}
+    # Check if there is already a task ID stored for these categories
+    cached_task_id = redis_client.get(cache_key)
+    if cached_task_id:
+        return {"status": "success", "task_id": cached_task_id}
     
     # If not in cache, trigger the Celery task
     task = generate_heatmap_task.delay(categories_dict)
+    # Store the task ID in Redis with the cache key
+    redis_client.set(cache_key, task.id)
+    
     return {"task_id": task.id}
 
 
