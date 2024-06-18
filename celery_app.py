@@ -19,8 +19,6 @@ celery_app.conf.update(
     enable_utc=True,
 )
 
-celery_app.autodiscover_tasks(['routers'])
-
 
 def ensure_closed_ring(ring):
     if ring[0] != ring[-1]:

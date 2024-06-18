@@ -3,16 +3,16 @@ from fastapi import Depends
 from fastapi import APIRouter
 from database.report_model import MongoDatabase
 from database.get_database import get_database
-from routers.celery_app import celery_app
+from celery_app import celery_app
 
 from fastapi import FastAPI, BackgroundTasks, Depends
 from pydantic import BaseModel
 from typing import List
 from celery.result import AsyncResult
-from routers.celery_app import celery_app
+from celery_app import celery_app
 from database.mongo_database import MongoDatabase
 from database.model import Category
-from .celery_app import generate_heatmap_task
+from celery_app import generate_heatmap_task
 
 router = APIRouter()
 
