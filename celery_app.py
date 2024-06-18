@@ -59,7 +59,7 @@ def generate_cache_key(categories: List[dict]) -> str:
     return json.dumps(sorted_categories)
 
 
-@celery_app.task(bind=True)
+@celery_app.task
 def generate_heatmap_task(categories):
     try:
         h = HeatMapModel()
