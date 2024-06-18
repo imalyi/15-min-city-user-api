@@ -60,7 +60,7 @@ def generate_cache_key(categories: List[dict]) -> str:
 
 
 @celery_app.task
-def generate_heatmap_task(self, categories):
+def generate_heatmap_task(categories, *args, **kwargs):
     h = HeatMapModel()
     result = h.generate(categories)
     # Generate cache key from sorted categories
