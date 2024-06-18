@@ -1,8 +1,10 @@
-from routers.celery_app import celery_app
 from database.mongo_database import MongoDatabase
 from database.model import Category
 from typing import List
 import geojson
+
+from celery import shared_task
+
 
 def ensure_closed_ring(ring):
     if ring[0] != ring[-1]:
@@ -31,7 +33,7 @@ class HeatMapModel:
         feature_collection = geojson.FeatureCollection(features)
         return geojson.loads(geojson.dumps(feature_collection))
 
-@celery_app.task(name="generate_heatmap_task")
+@shared_task(name="generate_heatmap_task")
 def generate_heatmap_task(categories):
     h = HeatMapModel()
     return h.generate(categories)

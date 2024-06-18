@@ -1,6 +1,5 @@
 from celery import Celery
 import os
-from routers.tasks import generate_heatmap_task
 
 
 celery_app = Celery(
@@ -16,5 +15,3 @@ celery_app.conf.update(
     timezone='UTC',
     enable_utc=True,
 )
-
-celery_app.register_task(generate_heatmap_task)
