@@ -83,6 +83,3 @@ class ReportGenerator:
     def load(self, secret: str) -> SavedReportsOut:
         data = self._model.load_report_by_id(secret)
         return data
-
-
-ReportModel().load_report_by_id("15mintest")

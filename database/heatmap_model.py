@@ -3,39 +3,38 @@ from typing import List
 from .mongo_database import MongoDatabase 
 from .model import Category
 import geojson
-from scipy.spatial import ConvexHull
-import numpy as np
 
+
+def ensure_closed_ring(ring):
+        if ring[0] != ring[-1]:
+            ring.append(ring[0])
+        return ring
 
 class HeatMapModel:
     def __init__(self):
         self._db = MongoDatabase().db
 
-    def generate(self, requeired_categories: list[Category]):
-        required_fields = []
+    def generate(self, required_categories: List[Category]):
         conditions = {}
-        for c in requeired_categories:
-            required_fields.append(f"{c.main_category}.{c.category}")
-            conditions[f"points_of_interest.{c.main_category}.{c.category}"] = {"$exists": True, "$ne": []}
-
+        for c in required_categories:
+            conditions[f"points_of_interest.{c.main_category}.{c.category}"] = { "$ne": []}
         results = self._db['address'].find(conditions)
-
-        coords = []
-        for document in results:
-            coords.append([document.get('location')[0], document.get('location')[1]])
-        
-
-        points = np.array(coords)
-        
-        if coords:
-            hull = ConvexHull(points)
-            hull_points = points[hull.vertices].tolist()
-            hull_points.append(hull_points[0])
-            polygon = geojson.Feature(geometry=geojson.Polygon([hull_points]), properties={"name": "Sample Polygon"})
-            feature_collection = geojson.FeatureCollection([polygon])
-            geojson_dict = geojson.loads(geojson.dumps(feature_collection))
-            return geojson_dict
-        return None
- 
-#h = HeatMapModel()
-#h.generate([Category(main_category='Zdrowie', category='Apteki')])
+        features = []
+        i = 0
+        for doc in results:
+                geometry = {
+                "type": "Polygon",
+                "coordinates": [ensure_closed_ring((ring)) for ring in doc['geometry']]
+            }
+                feature = geojson.Feature(
+                    geometry=geometry,
+                    
+                )
+                features.append(feature)
+                if i % 1000 == 0:
+                    print(f"Handled {i} docs")
+                i += 1
+        feature_collection = geojson.FeatureCollection(features)
+        feature_collection_geojson_str = geojson.dumps(feature_collection)
+        feature_collection_dict = geojson.loads(feature_collection_geojson_str)
+        return feature_collection_dict

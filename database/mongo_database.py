@@ -5,7 +5,7 @@ import os
 import logging
 
 MONGO_DB_NAME = os.environ.get("MONGO_DB_NAME", '15min')
-MONGO_CONNECT = os.environ.get("MONGO_CONNECT", "mongodb://root:example@node:27017/")
+MONGO_CONNECT = os.environ.get("MONGO_CONNECT", "mongodb://root:example@node:27777/")
 
 logger = logging.getLogger(f"{__name__}_Database")
 
