@@ -32,7 +32,7 @@ class HeatMapModel:
     def generate(self, required_categories: List[Category]):
         conditions = {}
         for c in required_categories:
-            conditions[f"points_of_interest.{c.main_category}.{c.category}"] = {"$ne": []}
+            conditions[f"points_of_interest.{c['main_category']}.{c['category']}"] = {"$ne": []}
         results = self._db['address'].find(conditions)
         features = []
         for i, doc in enumerate(results):
