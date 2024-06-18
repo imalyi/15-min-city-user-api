@@ -22,3 +22,17 @@ async def generate_heatmap(categories: List[Category], background_tasks: Backgro
     categories = [category.model_dump() for category in categories]
     task = generate_heatmap_task.delay(categories)
     return {"task_id": task.id}
+
+
+@router.get("/task_status/{task_id}")
+async def get_task_status(task_id: str):
+    task_result = AsyncResult(task_id)
+
+    if task_result.state == 'PENDING':
+        return {"status": "pending", "result": None}
+    elif task_result.state == 'FAILURE':
+        return {"status": "failure", "result": str(task_result.info)}
+    elif task_result.state == 'SUCCESS':
+        return {"status": "success", "result": task_result.result}
+
+    return {"status": task_result.state, "result": None}
