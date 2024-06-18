@@ -23,7 +23,7 @@ redis_client = redis.StrictRedis.from_url(os.getenv('REDIS_CACHE', "redis://192.
 
 def generate_cache_key(categories: List[dict]) -> str:
     # Sort the categories list based on the name and value
-    sorted_categories = sorted(categories, key=lambda x: (x['name'], x['value']))
+    sorted_categories = sorted(categories, key=lambda x: (x['main_category'], x['category']))
     # Convert the sorted list to a JSON string to use as the cache key
     return json.dumps(sorted_categories)
 
@@ -31,7 +31,7 @@ def generate_cache_key(categories: List[dict]) -> str:
 
 @router.post("/")
 async def generate_heatmap(categories: List[Category], background_tasks: BackgroundTasks, database: MongoDatabase = Depends(get_database)):
-    categories_dict = [category.dict() for category in categories]
+    categories_dict = [category.model_dump() for category in categories]
     # Generate cache key from sorted categories
     cache_key = generate_cache_key(categories_dict)
     
