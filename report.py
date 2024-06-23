@@ -1,10 +1,23 @@
 from fastapi import APIRouter
-from database.model import ReportOut, ReportRequest
-from database.report_model import ReportGenerator
+from celery_app import generate_report_task
+import redis
+import os
+import json
+from fastapi import Path, Query
+import logging
 
 router = APIRouter()
 
-@router.post('/')
-async def get_report(requested_report: ReportRequest) -> ReportOut:
-    return ReportGenerator().generate(requested_report.model_dump())
+redis_client = redis.StrictRedis.from_url(os.getenv('REDIS_CACHE', "redis://192.168.0.105:5123/1"), decode_responses=True)
+logging.basicConfig(level=logging.INFO)
 
+
+def generate_cache_key(address: str, max_distance: int) -> str:
+    return json.dumps({'address': address, 'max_distance': max_distance})
+
+
+@router.get('/{address}/')
+async def get_report(address: str = Path(...), max_distance: int = Query(1400)):
+    task = generate_report_task.delay(address, max_distance)
+    logging.info(f"Task created with ID: {task.id}")
+    return {"task_id": task.id}

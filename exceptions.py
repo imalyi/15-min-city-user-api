@@ -1,0 +1,2 @@
+class AdressNotFoundException(Exception):
+    pass

@@ -22,28 +22,19 @@ router = APIRouter()
 redis_client = redis.StrictRedis.from_url(os.getenv('REDIS_CACHE', "redis://192.168.0.105:5123/1"), decode_responses=True)
 
 def generate_cache_key(categories: List[dict]) -> str:
-    # Sort the categories list based on the name and value
     sorted_categories = sorted(categories, key=lambda x: (x['main_category'], x['category']))
-    # Convert the sorted list to a JSON string to use as the cache key
     return json.dumps(sorted_categories)
 
 
 @router.post("/")
-async def generate_heatmap(categories: List[Category], background_tasks: BackgroundTasks, database: MongoDatabase = Depends(get_database)):
+async def generate_heatmap(categories: List[Category]):
     categories_dict = [category.model_dump() for category in categories]
-    # Generate cache key from sorted categories
     cache_key = generate_cache_key(categories_dict)
-    # Check if there is already a task ID stored for these categories
     cached_task_id = redis_client.get(cache_key)
-  #  print(cached_task_id)
     if cached_task_id:
         return {"task_id": cached_task_id}
-    
-    # If not in cache, trigger the Celery task
     task = generate_heatmap_task.delay(categories_dict)
-    # Store the task ID in Redis with the cache key
-    redis_client.set(cache_key, task.id)
-    
+    redis_client.set(cache_key, task.id)    
     return {"task_id": task.id}
 
 

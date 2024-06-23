@@ -4,13 +4,13 @@ from typing import List
 from database.model import Category
 from database.mongo_database import MongoDatabase
 import geojson
-import json
 import redis
+from report_generator import Report
 
 redis_client = redis.StrictRedis.from_url(os.getenv('REDIS_CACHE', "redis://192.168.0.105:5123/5"), decode_responses=True)
 
 celery_app = Celery(
-    'heatmap_worker',
+    '15min_worker',
     broker=os.environ.get("CELERY_BROKER_URL", "redis://node:5123/0"),
     backend=os.environ.get("CELERY_RESULT_BACKEND", "redis://node:5123/0")
 )
@@ -50,15 +50,14 @@ class HeatMapModel:
                 print(f"Handled {i} docs")
         feature_collection = geojson.FeatureCollection(features)
         return geojson.loads(geojson.dumps(feature_collection))
-    
-def generate_cache_key(categories: List[dict]) -> str:
-    # Sort the categories list based on the name and value
-    sorted_categories = sorted(categories, key=lambda x: (x['main_category'], x['category']))
-    # Convert the sorted list to a JSON string to use as the cache key
-    return json.dumps(sorted_categories)
 
 @celery_app.task
 def generate_heatmap_task(categories, *args, **kwargs):
     h = HeatMapModel()
     result = h.generate(categories)
     return result
+
+@celery_app.task
+def generate_report_task(address, max_distance, *args, **kwargs):
+    r = Report(address, max_distance)
+    return r.report
