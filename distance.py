@@ -1,9 +1,11 @@
 import openrouteservice as ors
+import os
+
 
 class DistanceCalculator:
     def __init__(self):
 
-        self.client = ors.Client(base_url="http://node:8080/ors")
+        self.client = ors.Client(base_url=os.getenv("OSR_API_URL", 'http://192.168.0.105:8080/ors'))
 
 
     def calc_distance(self, coords):
