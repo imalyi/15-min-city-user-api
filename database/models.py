@@ -1,6 +1,10 @@
 from mongoengine import Document, EmbeddedDocument, fields, connect
+import os
 
-connect(host='mongodb://root:example@node:27777', db='15min')
+
+MONGO_CONNECT = os.environ.get("MONGO_CONNECT", "mongodb://root:example@node:27777/")
+
+connect(host=MONGO_CONNECT, db='15min')
 
 class Categories(EmbeddedDocument):
     main = fields.StringField(required=True)
