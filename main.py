@@ -1,10 +1,10 @@
 import uvicorn
 from fastapi import FastAPI
 
-from report import router as report_router
-from task_status import router as task_status_router
-#from categories import router as categories_router
-from address import router as address_router
+from handlers.report import router as report_router
+#from task_status import router as task_status_router
+from handlers.categories import router as categories_router
+#from address import router as address_router
 #from object import router as object_router
 #from user import router as user_router
 #from heatmap import router as heatmap_router
@@ -20,12 +20,12 @@ app.add_middleware(middleware_class=CORSMiddleware,
     allow_headers=["*"])
 
 app.include_router(report_router, prefix='/report', tags=['Report'])
-#app.include_router(categories_router, prefix="/categories", tags=["Categories"])
-app.include_router(address_router, prefix="/address", tags=["Address"])
+app.include_router(categories_router, prefix="/categories", tags=["Categories"])
+#app.include_router(address_router, prefix="/address", tags=["Address"])
 #app.include_router(object_router, prefix="/object", tags=["Objects"])
 #app.include_router(user_router, prefix="/user", tags=["User"])
 #app.include_router(heatmap_router, prefix='/heatmap', tags=['Heat Map'])
-app.include_router(task_status_router, prefix="/task_status", tags=['Task Status'])
+#app.include_router(task_status_router, prefix="/task_status", tags=['Task Status'])
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8001)

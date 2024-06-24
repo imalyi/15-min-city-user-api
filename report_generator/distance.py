@@ -15,6 +15,3 @@ class DistanceCalculator:
         except KeyError:
             return 99999999
         return distance
-
-# use example
-#res = c.calc_distance([[18.487937326403967, 54.35130292823335], [18.584439363376403, 54.35428968560705]])

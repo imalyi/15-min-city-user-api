@@ -2,7 +2,7 @@ from fastapi import Depends
 from fastapi import APIRouter
 from database.get_database import get_database
 from database.mongo_database import MongoDatabase
-from database.model import AddressIn
+from database.schemas import AddressIn
 from typing import List
 
 router = APIRouter()

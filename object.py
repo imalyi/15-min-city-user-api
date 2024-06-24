@@ -5,7 +5,7 @@ from starlette.middleware.cors import CORSMiddleware
 from fastapi import APIRouter
 from database.report_model import MongoDatabase
 from database.get_database import get_database
-from database.model import Objects
+from database.schemas import Objects
 
 logging.basicConfig(level=logging.INFO)
 

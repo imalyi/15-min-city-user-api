@@ -1,11 +1,11 @@
 from celery import Celery
 import os
 from typing import List
-from database.model import Category
+from database.schemas import Category
 from database.mongo_database import MongoDatabase
 import geojson
 import redis
-from report_generator import Report
+from report_generator.report import Report
 
 redis_client = redis.StrictRedis.from_url(os.getenv('REDIS_CACHE', "redis://192.168.0.105:5123/5"), decode_responses=True)
 

@@ -1,4 +1,5 @@
 from .models import ResidentialBuilding
+from .models import Category
 import os
 import logging
 import re
@@ -16,24 +17,12 @@ class MongoDatabase:
     def search_by_partial_name(self, address: str):
         try:
             regex = re.compile(f'.*{re.escape(address)}.*', re.IGNORECASE)
-            result= ResidentialBuilding.objects(address__street=regex).limit(5)
+            result = ResidentialBuilding.objects(address__street=regex).limit(5)
             return [doc.address.street for doc in result]
         except Exception as e:
             logger.error(f"Error executing MongoDB query: {e}")
             return []
 
     def get_categories(self):
-        pass
-
-
-# Example usage
-if __name__ == "__main__":
-    db = MongoDatabase()
-    print(db.search_by_partial_name("Aleja Grunwaldzka 25"))
-    print(db.get_categories())
-
-
-
-
-
-
+        result = Category.objects.all()
+        return result

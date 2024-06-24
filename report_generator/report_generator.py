@@ -1,7 +1,7 @@
+
 from database.models import POI
-from distance import DistanceCalculator
+from report_generator.distance import DistanceCalculator
 import geojson
-from address_to_coordinates import AddressToGeoCoordinates
 
 
 class ReportGenerator:
@@ -38,8 +38,8 @@ class ReportGenerator:
                 properties={
                     "name": poi.name,
                     "categories": {
-                        "main": poi.categories.main,
-                        "sub": poi.categories.sub
+#                        "main": poi.categories,
+#                        "sub": poi.categories
                     },
                     "address": {
                         "city": poi.address.city,
@@ -51,16 +51,3 @@ class ReportGenerator:
             features.append(feature)        
         return geojson.FeatureCollection(features) 
 
-
-class Report:
-    def __init__(self, address: str, max_distance: int) -> None:
-        self._address_to_cordinates = AddressToGeoCoordinates(address)
-        
-        lat = self._address_to_cordinates.latitude
-        lon = self._address_to_cordinates.longitude
-        self._report_generator = ReportGenerator(lat, lon, max_distance)
-    
-    @property
-    def report(self):
-        return self._report_generator.generate_report()
-    

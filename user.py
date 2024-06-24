@@ -4,7 +4,7 @@ from fastapi import APIRouter
 from database.report_model import MongoDatabase
 from database.get_database import get_database
 from fastapi import FastAPI, HTTPException
-from database.model import AddressIn, UserDataIn, SavedReportsOut
+from database.schemas import AddressIn, UserDataIn, SavedReportsOut
 from typing import List
 from database.report_model import ReportGenerator
 

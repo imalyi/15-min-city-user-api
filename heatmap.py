@@ -1,4 +1,4 @@
-from database.model import Category
+from database.schemas import Category
 from fastapi import Depends
 from fastapi import APIRouter
 from database.report_model import MongoDatabase
@@ -11,14 +11,13 @@ from typing import List
 from celery.result import AsyncResult
 from celery_app import celery_app
 from database.mongo_database import MongoDatabase
-from database.model import Category
+from database.schemas import Category
 from celery_app import generate_heatmap_task
 import json
 import os
 
 router = APIRouter()
 
-# Initialize Redis client using connection string
 redis_client = redis.StrictRedis.from_url(os.getenv('REDIS_CACHE', "redis://192.168.0.105:5123/1"), decode_responses=True)
 
 def generate_cache_key(categories: List[dict]) -> str:
@@ -26,7 +25,7 @@ def generate_cache_key(categories: List[dict]) -> str:
     return json.dumps(sorted_categories)
 
 
-@router.post("/")
+@router.post("/", status_code=202)
 async def generate_heatmap(categories: List[Category]):
     categories_dict = [category.model_dump() for category in categories]
     cache_key = generate_cache_key(categories_dict)

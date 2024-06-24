@@ -16,7 +16,7 @@ def generate_cache_key(address: str, max_distance: int) -> str:
     return json.dumps({'address': address, 'max_distance': max_distance})
 
 
-@router.get('/{address}/')
+@router.get('/{address}/', status_code=202)
 async def get_report(address: str = Path(...), max_distance: int = Query(1400)):
     task = generate_report_task.delay(address, max_distance)
     logging.info(f"Task created with ID: {task.id}")
