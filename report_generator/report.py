@@ -13,6 +13,3 @@ class Report:
     def report(self):
         return self._report_generator.generate_report()
     
-
-r = Report("Aleja Grunwaldzka 195/197", 555)
-print(r.report)
