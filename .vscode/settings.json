@@ -1,0 +1,15 @@
+{
+    "python.languageServer": "Default",
+    "ruff.nativeServer": false,
+    "black-formatter.path": ["black"],
+    "editor.formatOnSave": true,
+
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.formatOnSave": true
+  },
+  "black-formatter.args": [
+    "--line-length=79"
+  ],
+  "codescene.enableAutoRefactor": true
+}
