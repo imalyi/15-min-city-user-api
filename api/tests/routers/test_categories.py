@@ -7,7 +7,10 @@ async def create_category(
 ) -> dict:
     response = await async_client.post(
         "/categories/",
-        json={"parent_category": parent_category, "child_category": child_category},
+        json={
+            "parent_category": parent_category,
+            "child_category": child_category,
+        },
     )
     return response.json()
 
@@ -15,7 +18,9 @@ async def create_category(
 @pytest.fixture()
 async def created_category(async_client: AsyncClient):
     response = await create_category(
-        "test parent category", "test child category", async_client=async_client
+        "test parent category",
+        "test child category",
+        async_client=async_client,
     )
     return response
 

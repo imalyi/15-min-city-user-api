@@ -16,7 +16,8 @@ from api.database import poi_category_table
 from api.schemas.category import Category
 from api.schemas.address import Address
 from api.database import poi_address_table
-
+from api.schemas.poi_category import POICategory
+from api.schemas.poi_address import POIAddress
 
 router = APIRouter()
 
@@ -48,7 +49,7 @@ async def get_all_pois():
     return await database.fetch_all(query=query)
 
 
-@router.post("/", status_code=201)
+@router.post("/", status_code=201, response_model=POI)
 async def create_pois(poi_data: POICreate):
     """
     Create a new POI
@@ -67,27 +68,67 @@ async def create_pois(poi_data: POICreate):
     if poi:
         raise HTTPException(409, f"POI with name  {data['name']} exists")
     query = poi_table.insert().values(data)
-    return await database.execute(query=query)
+    poi_id = await database.execute(query=query)
+    return {"id": poi_id, **data}
 
 
-@router.post("/{poi_id}/categories/{category_id}", status_code=201)
+@router.post(
+    "/{poi_id}/categories/{category_id}",
+    status_code=201,
+    response_model=POICategory,
+)
 async def attach_poi_to_category(poi_id: int, category_id: int):
-    """
-    Attach a POI to a category
-
-    Args:
-    poi_id (int): The ID of the POI
-    category_id (int): The ID of the category
-
-    Returns:
-    None
-    """
     _ = await get_poi(poi_id)
     _ = await get_category(category_id)
+
+    query = poi_category_table.select().where(
+        poi_category_table.c.category_id == category_id
+        and poi_category_table.c.poi_id == poi_id
+    )
+
+    poi_category = await database.fetch_one(query=query)
+
+    if poi_category:
+        raise HTTPException(
+            409, f"POI with id {poi_id}, Category with id {category_id} exist"
+        )
     query = poi_category_table.insert().values(
         {"category_id": category_id, "poi_id": poi_id}
     )
-    await database.execute(query=query)
+    poi_category_id = await database.execute(query=query)
+    query = poi_category_table.select().where(
+        poi_category_table.c.id == poi_category_id
+    )
+    return await database.fetch_one(query=query)
+
+
+@router.post(
+    "/{poi_id}/addresses/{address_id}",
+    status_code=201,
+    response_model=POIAddress,
+)
+async def attach_poi_to_address(poi_id: int, address_id: int):
+    _ = await get_poi(poi_id)
+    _ = await get_address(address_id)
+
+    query = poi_address_table.select().where(
+        poi_address_table.c.address_id == address_id,
+        poi_address_table.c.poi_id == poi_id,
+    )
+    poi_address = await database.fetch_one(query=query)
+    if poi_address:
+        raise HTTPException(
+            409, f"POI with id {poi_id}, Address with id {address_id} exist"
+        )
+    query = poi_address_table.insert().values(
+        {"address_id": address_id, "poi_id": poi_id}
+    )
+
+    poi_address_id = await database.execute(query=query)
+    query = poi_address_table.select().where(
+        poi_address_table.c.id == poi_address_id
+    )
+    return await database.fetch_one(query=query)
 
 
 @router.get("/{poi_id}", status_code=200, response_model=POI)
@@ -124,6 +165,7 @@ async def get_poi_categories(poi_id: int):
     Returns:
     list[Category]: A list of categories associated with the POI
     """
+    _ = await get_poi(poi_id=poi_id)
     query = poi_category_table.select().where(
         poi_category_table.c.poi_id == poi_id
     )
@@ -148,6 +190,9 @@ async def get_poi_addresses(poi_id: int):
     Returns:
     list[Address]: A list of addresses associated with the POI
     """
+
+    _ = await get_poi(poi_id=poi_id)
+
     query = poi_address_table.select().where(
         poi_address_table.c.poi_id == poi_id
     )
@@ -156,26 +201,3 @@ async def get_poi_addresses(poi_id: int):
     for poi_address in poi_addresses:
         address_obj.append(await get_address(poi_address.address_id))
     return address_obj
-
-
-@router.post("/{poi_id}/addresses/{address_id}", status_code=201)
-async def attach_poi_to_address(poi_id: int, address_id: int):
-    """
-    Attach a POI to an address
-
-    Args:
-    poi_id (int): The ID of the POI
-    address_id (int): The ID of the address
-
-    Returns:
-    None
-
-    Raises:
-    HTTPException: If the POI does not exist
-    """
-    _ = await get_poi(poi_id)
-    _ = await get_address(address_id)
-    query = poi_address_table.insert().values(
-        {"address_id": address_id, "poi_id": poi_id}
-    )
-    await database.execute(query=query)

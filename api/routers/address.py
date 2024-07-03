@@ -3,9 +3,9 @@ from api.database import address_table
 
 from api.schemas.address import Address, AddressCreate
 from api.database import database
+from geoalchemy2 import WKTElement
 
 router = APIRouter()
-# https://camillovisini.com/coding/abstracting-fastapi-services read this about dals and something else
 
 
 @router.get("/", status_code=200, response_model=list[Address])
@@ -14,16 +14,21 @@ async def get_all_addresses():
     return await database.fetch_all(query=query)
 
 
-@router.post("/", status_code=201, response_model=Address)
+@router.post("/", status_code=204)
 async def create_address(address: AddressCreate):
-    data = address.model_dump()
-    query = address_table.select().where(address_table.c.street == data["street"])
-    address = await database.fetch_one(query=query)
-    if not address:
-        query = address_table.insert().values(data)
-        address_id = await database.execute(query=query)
-        return {**data, "id": address_id}
-    return address
+    query = address_table.select().where(
+        address_table.c.street == address.street
+    )
+    existing_addres = await database.fetch_one(query=query)
+    if existing_addres:
+        raise HTTPException(409, f"Adress exists")
+    query = address_table.insert().values(
+        street=address.street,
+        city=address.city,
+        postcode=address.postcode,
+        geometry=WKTElement(address.geometry.wkt, srid=4326),
+    )
+    await database.execute(query=query)
 
 
 @router.get("/{address_id}", status_code=200, response_model=Address)
@@ -32,5 +37,4 @@ async def get_address(address_id: int):
     result = await database.fetch_one(query=query)
     if not result:
         raise HTTPException(404, f"Address with id {address_id} not exists")
-
     return result
