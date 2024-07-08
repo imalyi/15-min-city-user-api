@@ -7,26 +7,25 @@ from api.schemas.category import CategoryCreate, Category, Preference
 from api.database import database
 from api.database import category_table, category_collections_table
 
-router = APIRouter()
+prefrences_router = APIRouter()
+categories_router = APIRouter()
 
 
-@router.get("/", status_code=200, response_model=list[Preference])
+@prefrences_router.get("/", status_code=200, response_model=list[Preference])
 async def get_all_preferences():
+    result = []
     query = category_collections_table.select()
-    return await database.fetch_all(query=query)
+    for collection in await database.fetch_all(query=query):
+        query = category_table.select().where(
+            category_table.c.collection_id == collection.id
+        )
+        collection = dict(collection)
+        collection["categories"] = await database.fetch_all(query=query)
+        result.append(collection)
+    return result
 
 
-@router.get(
-    "/{collection_id}/", status_code=200, response_model=list[Category]
-)
-async def get_categories_from_collection(collection_id: int):
-    query = category_table.select().where(
-        category_table.c.collection_id == collection_id
-    )
-    return await database.fetch_all(query=query)
-
-
-@router.get(
+@categories_router.get(
     "/categories/{category_id}", status_code=200, response_model=Category
 )
 async def get_category(category_id: int):
@@ -51,7 +50,9 @@ async def get_category(category_id: int):
     return category
 
 
-@router.post("/categories/", status_code=201, response_model=Category)
+@categories_router.post(
+    "/categories/", status_code=201, response_model=Category
+)
 async def create_category(category: CategoryCreate):
     """
     Create a new category.
@@ -81,7 +82,7 @@ async def create_category(category: CategoryCreate):
     )
 
 
-@router.delete("/categories/{category_id}", status_code=204)
+@categories_router.delete("/categories/{category_id}", status_code=204)
 async def delete_category(category_id: int):
     """
     Delete a specific category by ID.
@@ -93,7 +94,7 @@ async def delete_category(category_id: int):
     await database.execute(query=query)
 
 
-@router.delete("/categories/", status_code=204)
+@categories_router.delete("/categories/", status_code=204)
 async def delete_all_categories():
     """
     Delete all categories.

@@ -16,6 +16,7 @@ class Category(CategoryCreate):
 
 class PreferenceCreate(GlobalModelWithJSONAlias):
     title: str
+    categories: list[Category]
 
 
 class Preference(PreferenceCreate):

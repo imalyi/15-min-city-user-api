@@ -1,7 +1,8 @@
 from pydantic import BaseModel
+from api.schemas.global_model import GlobalModelWithJSONAlias
 
 
-class POICreate(BaseModel):
+class POICreate(GlobalModelWithJSONAlias):
     name: str
 
 

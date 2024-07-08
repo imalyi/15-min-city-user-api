@@ -16,7 +16,6 @@ category_collections_table = sqlalchemy.Table(
     sqlalchemy.UniqueConstraint("title"),
 )
 
-
 category_table = sqlalchemy.Table(
     "categories",
     metadata,
@@ -42,6 +41,11 @@ address_table = sqlalchemy.Table(
     sqlalchemy.Column("postcode", sqlalchemy.String, nullable=True),
     sqlalchemy.Column(
         "geometry", geoalchemy2.Geometry("MULTIPOLYGON"), nullable=False
+    ),
+    sqlalchemy.Column(
+        "full_address",
+        sqlalchemy.String,
+        sqlalchemy.Computed("street || ', ' || city || ' ' || postcode"),
     ),
     sqlalchemy.UniqueConstraint("street", "city", "postcode"),
 )
@@ -114,64 +118,41 @@ subscription_level_table = sqlalchemy.Table(
     sqlalchemy.Column(
         "heatmap_generation_permission", sqlalchemy.Boolean, default=False
     ),
-    sqlalchemy.Column("level", sqlalchemy.Integer, default=0),
+    sqlalchemy.Column("level", sqlalchemy.Integer, default=0, nullable=False),
+    sqlalchemy.UniqueConstraint("level"),
 )
 
 user_table = sqlalchemy.Table(
     "users",
     metadata,
-    sqlalchemy.Column("id", primary_key=True),
+    sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True),
     sqlalchemy.Column("email", sqlalchemy.String, nullable=False),
     sqlalchemy.Column("password", sqlalchemy.String, nullable=False),
-    sqlalchemy.Column("is_activated", sqlalchemy.Boolean, default=False),
+    sqlalchemy.Column("is_activated", sqlalchemy.Boolean, default=True),
     sqlalchemy.Column(
         "registration_date",
         sqlalchemy.DateTime,
         server_default=sqlalchemy.func.now(),
     ),
     sqlalchemy.Column("allow_telemetry", sqlalchemy.Boolean, default=True),
+    sqlalchemy.Column("is_superuser", sqlalchemy.Boolean, default=False),
     sqlalchemy.UniqueConstraint("email"),
 )
 
-history_preference_table = sqlalchemy.Table(
-    "history_preference",
+user_subscriptions = sqlalchemy.Table(
+    "user_subscriptions",
     metadata,
-    sqlalchemy.Column("id", primary_key=True),
-    sqlalchemy.Column(
-        "history_id", sqlalchemy.ForeignKey("history.id"), nullable=False
-    ),
-    sqlalchemy.Column("category_id", sqlalchemy.ForeignKey("categories.id")),
-    sqlalchemy.UniqueConstraint("history_id", "category_id"),
-)
-
-history_custom_address_table = sqlalchemy.Table(
-    "history_custom_address",
-    metadata,
-    sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True),
-    sqlalchemy.Column(
-        "custom_address_id",
-        sqlalchemy.ForeignKey("addresses.id"),
-        nullable=False,
-    ),
-)
-
-history_table = sqlalchemy.Table(
-    "history",
-    metadata,
-    sqlalchemy.Column("id", primary_key=True),
-    sqlalchemy.Column(
-        "address_id", sqlalchemy.ForeignKey("addresses.id"), nullable=False
-    ),
     sqlalchemy.Column(
         "user_id", sqlalchemy.ForeignKey("users.id"), nullable=False
     ),
     sqlalchemy.Column(
-        "datetime",
-        sqlalchemy.DateTime,
-        server_default=sqlalchemy.func.now(),
+        "subscription_id", sqlalchemy.ForeignKey("subscription_levels.id")
     ),
+    sqlalchemy.Column("date_from", sqlalchemy.DateTime(), nullable=False),
+    sqlalchemy.Column("date_to", sqlalchemy.DateTime(), nullable=False),
+    sqlalchemy.UniqueConstraint("user_id", "date_from"),
+    sqlalchemy.UniqueConstraint("user_id", "date_to"),
 )
-
 
 metadata.create_all(engine)
 database = databases.Database(
