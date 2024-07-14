@@ -1,111 +1,47 @@
-import databases
+from typing import Annotated
+
 import sqlalchemy
+from sqlalchemy import String
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import DeclarativeBase, mapped_column, sessionmaker
+
 from api.config import config
-import geoalchemy2
+
+str_256 = Annotated[str, 256]
+
+pk_int = Annotated[int, mapped_column(primary_key=True)]
+required_int = Annotated[int, mapped_column(nullable=False)]
+required_string = Annotated[str, mapped_column(nullable=False)]
+
+engine = create_async_engine(config.DATABASE_URL, echo=True)
+
+async_session_maker = sessionmaker(
+    engine, class_=AsyncSession, expire_on_commit=False
+)
+
+
+class Base(DeclarativeBase):
+    type_annotation_map = {str_256: String(256)}
+
+    repr_cols_num = 3
+    repr_cols = tuple()
+
+    def __repr__(self):
+        cols = []
+        for idx, col in enumerate(self.__table__.columns.keys()):
+            if col in self.repr_cols or idx < self.repr_cols_num:
+                cols.append(f"{col}={getattr(self, col)}")
+
+        return f"<{self.__class__.__name__} {', '.join(cols)}>"
+
 
 metadata = sqlalchemy.MetaData()
 
-engine = sqlalchemy.create_engine(config.DATABASE_URL)
-
-
-category_collections_table = sqlalchemy.Table(
-    "category_collections",
-    metadata,
-    sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True),
-    sqlalchemy.Column("title", sqlalchemy.String),
-    sqlalchemy.UniqueConstraint("title"),
+engine = sqlalchemy.create_engine(
+    config.DATABASE_URL, echo=False, pool_size=15
 )
 
-category_table = sqlalchemy.Table(
-    "categories",
-    metadata,
-    sqlalchemy.Column("title", sqlalchemy.String),
-    sqlalchemy.Column(
-        "collection_id", sqlalchemy.ForeignKey("category_collections.id")
-    ),
-    sqlalchemy.Column("order", sqlalchemy.Integer),
-    sqlalchemy.Column("is_default", sqlalchemy.Boolean),
-    sqlalchemy.Column("is_hidden", sqlalchemy.Boolean),
-    sqlalchemy.Column("minimum_subscription_level", sqlalchemy.Integer),
-    sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True),
-    sqlalchemy.UniqueConstraint("title", "collection_id"),
-)
-
-
-address_table = sqlalchemy.Table(
-    "addresses",
-    metadata,
-    sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True),
-    sqlalchemy.Column("street", sqlalchemy.String, nullable=False),
-    sqlalchemy.Column("city", sqlalchemy.String, nullable=False),
-    sqlalchemy.Column("postcode", sqlalchemy.String, nullable=True),
-    sqlalchemy.Column(
-        "geometry", geoalchemy2.Geometry("MULTIPOLYGON"), nullable=False
-    ),
-    sqlalchemy.Column(
-        "full_address",
-        sqlalchemy.String,
-        sqlalchemy.Computed("street || ', ' || city || ' ' || postcode"),
-    ),
-    sqlalchemy.UniqueConstraint("street", "city", "postcode"),
-)
-
-
-poi_table = sqlalchemy.Table(
-    "pois",
-    metadata,
-    sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True),
-    sqlalchemy.Column("name", sqlalchemy.String),
-    sqlalchemy.UniqueConstraint("name"),
-)
-
-
-poi_category_table = sqlalchemy.Table(
-    "pois_categories",
-    metadata,
-    sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True),
-    sqlalchemy.Column(
-        "poi_id", sqlalchemy.ForeignKey("pois.id"), nullable=False
-    ),
-    sqlalchemy.Column(
-        "category_id", sqlalchemy.ForeignKey("categories.id"), nullable=False
-    ),
-    sqlalchemy.Column(
-        "created_at",
-        sqlalchemy.DateTime(timezone=True),
-        server_default=sqlalchemy.func.now(),
-    ),
-    sqlalchemy.Column(
-        "last_seen_at",
-        sqlalchemy.DateTime(timezone=True),
-        server_onupdate=sqlalchemy.func.now(),
-    ),
-    sqlalchemy.UniqueConstraint("poi_id", "category_id"),
-)
-
-poi_address_table = sqlalchemy.Table(
-    "poi_addresses",
-    metadata,
-    sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True),
-    sqlalchemy.Column(
-        "poi_id", sqlalchemy.ForeignKey("pois.id"), nullable=False
-    ),
-    sqlalchemy.Column(
-        "address_id", sqlalchemy.ForeignKey("addresses.id"), nullable=False
-    ),
-    sqlalchemy.Column(
-        "created_at",
-        sqlalchemy.DateTime(timezone=True),
-        server_default=sqlalchemy.func.now(),
-    ),
-    sqlalchemy.Column(
-        "last_seen_at",
-        sqlalchemy.DateTime(timezone=True),
-        server_onupdate=sqlalchemy.func.now(),
-    ),
-    sqlalchemy.UniqueConstraint("poi_id", "address_id"),
-)
-
+"""
 subscription_level_table = sqlalchemy.Table(
     "subscription_levels",
     metadata,
@@ -125,18 +61,6 @@ subscription_level_table = sqlalchemy.Table(
 user_table = sqlalchemy.Table(
     "users",
     metadata,
-    sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True),
-    sqlalchemy.Column("email", sqlalchemy.String, nullable=False),
-    sqlalchemy.Column("password", sqlalchemy.String, nullable=False),
-    sqlalchemy.Column("is_activated", sqlalchemy.Boolean, default=True),
-    sqlalchemy.Column(
-        "registration_date",
-        sqlalchemy.DateTime,
-        server_default=sqlalchemy.func.now(),
-    ),
-    sqlalchemy.Column("allow_telemetry", sqlalchemy.Boolean, default=True),
-    sqlalchemy.Column("is_superuser", sqlalchemy.Boolean, default=False),
-    sqlalchemy.UniqueConstraint("email"),
 )
 
 user_subscriptions = sqlalchemy.Table(
@@ -158,3 +82,8 @@ metadata.create_all(engine)
 database = databases.Database(
     config.DATABASE_URL, force_rollback=config.DB_FORCE_ROLL_BACK
 )
+
+
+# запрос на вставку statement, на выборку query
+# переделать на декалативный вид
+"""

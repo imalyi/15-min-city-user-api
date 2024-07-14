@@ -1,15 +1,9 @@
-"""
-POI (Points of Interest) Management Module
-This module provides APIs for managing POIs.
-It also provides APIs for attaching POIs to categories and addresses.
-"""
-
 from fastapi import APIRouter, HTTPException
 from api.schemas.poi import POICreate, POI
 
 from api.database import database
 from api.database import poi_table
-from api.routers.category import get_category
+from api.categories.router import get_category
 from api.routers.address import get_address
 
 from api.database import poi_category_table
@@ -23,15 +17,6 @@ router = APIRouter()
 
 
 async def is_poi_exists(name: str):
-    """
-    Check if a POI with the given name exists
-
-    Args:
-    name (str): The name of the POI to check
-
-    Returns:
-    bool: True if the POI exists, False otherwise
-    """
     query = poi_table.select().where((poi_table.c.name == name))
     result = await database.fetch_one(query=query)
     return result
@@ -39,30 +24,13 @@ async def is_poi_exists(name: str):
 
 @router.get("/", status_code=200)
 async def get_all_pois():
-    """
-    Get all POIs
-
-    Returns:
-    list: A list of all POIs
-    """
     query = poi_table.select()
     return await database.fetch_all(query=query)
 
 
 @router.post("/", status_code=201, response_model=POI)
 async def create_pois(poi_data: POICreate):
-    """
-    Create a new POI
 
-    Args:
-    poi_data (POICreate): The data for the new POI
-
-    Returns:
-    int: The ID of the created POI
-
-    Raises:
-    HTTPException: If a POI with the same name already exists
-    """
     data = poi_data.model_dump()
     poi = await is_poi_exists(data["name"])
     if poi:
@@ -133,18 +101,6 @@ async def attach_poi_to_address(poi_id: int, address_id: int):
 
 @router.get("/{poi_id}", status_code=200, response_model=POI)
 async def get_poi(poi_id: int):
-    """
-    Get a POI by ID
-
-    Args:
-    poi_id (int): The ID of the POI
-
-    Returns:
-    POI: The POI with the given ID
-
-    Raises:
-    HTTPException: If the POI does not exist
-    """
     query = poi_table.select().where(poi_table.c.id == poi_id)
     result = await database.fetch_one(query=query)
     if not result:
@@ -156,15 +112,6 @@ async def get_poi(poi_id: int):
     "/{poi_id}/categories/", status_code=200, response_model=list[Category]
 )
 async def get_poi_categories(poi_id: int):
-    """
-    Get the categories of a POI
-
-    Args:
-    poi_id (int): The ID of the POI
-
-    Returns:
-    list[Category]: A list of categories associated with the POI
-    """
     _ = await get_poi(poi_id=poi_id)
     query = poi_category_table.select().where(
         poi_category_table.c.poi_id == poi_id
@@ -181,16 +128,6 @@ async def get_poi_categories(poi_id: int):
     "/{poi_id}/addresses/", status_code=200, response_model=list[Address]
 )
 async def get_poi_addresses(poi_id: int):
-    """
-    Get the addresses of a POI
-
-    Args:
-    poi_id (int): The ID of the POI
-
-    Returns:
-    list[Address]: A list of addresses associated with the POI
-    """
-
     _ = await get_poi(poi_id=poi_id)
 
     query = poi_address_table.select().where(
