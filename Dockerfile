@@ -18,4 +18,4 @@ COPY . $DockerHOME
 RUN pip install -r requirements.txt
 EXPOSE 80
 
-CMD ["fastapi", "run", "api/api.py", "--port", "80"]
+CMD ["fastapi", "run", "/home/app/api/api.py", "--port", "80"]

@@ -8,7 +8,7 @@ class BaseConfig(BaseSettings):
     ENV_STATE: Optional[str] = "test"
 
     model_config = SettingsConfigDict(
-        env_file=DOTENV, extra="ignore", env_file_encoding="utf-8"
+        env_file=".env", extra="ignore", env_file_encoding="utf-8"
     )
 
 
