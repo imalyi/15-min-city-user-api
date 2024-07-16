@@ -12,6 +12,9 @@ from api.database import Base
 from api.category_collections.models import CategoryCollections
 from api.categories.models import Categories
 from api.addresses.models import Address
+from api.pois.models import POI, POIAddresses, POICategories
+from api.subscriptions.models import SubscriptionLevel
+from api.users.models import User
 from alembic import context
 from api.config import config as fastapi_config
 

@@ -9,14 +9,14 @@ from sqlalchemy import ForeignKey, UniqueConstraint
 
 
 class POI(Base):
-    __table__ = "pois"
+    __tablename__ = "pois"
     id: Mapped[pk_int]
     name: Mapped[required_string]
-    __table_args__ = UniqueConstraint("name")
+    __table_args__ = (UniqueConstraint("name"),)
 
 
 class POICategories(Base):
-    __table__ = "pois_categories"
+    __tablename__ = "pois_categories"
     id: Mapped[pk_int]
     poi_id: Mapped[required_int] = mapped_column(
         ForeignKey("pois.id", ondelete="CASCADE")
@@ -25,9 +25,11 @@ class POICategories(Base):
         ForeignKey("categories.id", ondelete="CASCADE")
     )
 
+    __table_args__ = (UniqueConstraint("poi_id", "category_id"),)
+
 
 class POIAddresses(Base):
-    __table__ = "poi_addresses"
+    __tablename__ = "poi_addresses"
     id: Mapped[pk_int]
     poi_id: Mapped[required_int] = mapped_column(
         ForeignKey("pois.id", ondelete="CASCADE")
@@ -36,4 +38,4 @@ class POIAddresses(Base):
         ForeignKey("addresses.id", ondelete="CASCADE")
     )
 
-    __table_args__ = UniqueConstraint("address_id", "poi_id")
+    __table_args__ = (UniqueConstraint("address_id", "poi_id"),)
