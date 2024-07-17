@@ -6,7 +6,14 @@ from api.category_collections.router import (
 from api.addresses.router import router as addresses_router
 from api.pois.router import router as pois_router
 
-from api.users.router import user_router, register_user_router
+from api.users.router import (
+    user_router,
+    register_user_router,
+    auth_user_router,
+)
+from api.subscriptions.router import router as subscription_router
+
+from api.invite_codes.router import router as invite_codes_router
 
 app = FastAPI()
 
@@ -18,3 +25,12 @@ app.include_router(user_router, prefix="/users", tags=["Users"])
 app.include_router(
     register_user_router, prefix="/users", tags=["Register user"]
 )
+app.include_router(
+    auth_user_router,
+    prefix="/users",
+    tags=["auth"],
+)
+
+
+app.include_router(subscription_router)
+app.include_router(invite_codes_router)

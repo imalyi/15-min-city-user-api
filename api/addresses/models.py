@@ -16,12 +16,12 @@ class Address(Base):
     id: Mapped[pk_int]
     street: Mapped[required_string]
     city: Mapped[required_string]
-    postcode: Mapped[str]
-    geometry: Mapped[str] = mapped_column(
-        geoalchemy2.Geometry("MULTIPOLYGON"), nullable=False
-    )
+    postcode: Mapped[str] = mapped_column(nullable=True)
+    geometry: Mapped[str] = mapped_column(geoalchemy2.Geometry("MULTIPOLYGON"))
     full_address: Mapped[str] = mapped_column(
-        Computed("street || ', ' || city || ' ' || postcode")
+        Computed("street || ', ' || city ||")
     )
 
-    __table_args__ = (UniqueConstraint("street", "city", "postcode"),)
+    __table_args__ = (
+        UniqueConstraint("street", "city", "postcode", "geometry"),
+    )

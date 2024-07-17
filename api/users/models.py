@@ -20,12 +20,6 @@ from sqlalchemy.ext.asyncio import (
 from api.database import async_session_maker
 
 
-class User(SQLAlchemyBaseUserTable[int], Base):
-    id: Mapped[int] = mapped_column(primary_key=True)
-    subscription_level: Mapped[int] = mapped_column(default=0)
-    name: Mapped[str]
-
-
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
     async with async_session_maker() as session:
         yield session
@@ -33,3 +27,10 @@ async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
 
 async def get_user_db(session: AsyncSession = Depends(get_async_session)):
     yield SQLAlchemyUserDatabase(session, User)
+
+
+class User(SQLAlchemyBaseUserTable[int], Base):
+    __tablename__ = "users"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    subscription_level: Mapped[int] = mapped_column(default=0)
+    name: Mapped[str]

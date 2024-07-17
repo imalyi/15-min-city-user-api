@@ -15,10 +15,14 @@ class AddressDAO(BaseDAO):
     @classmethod
     async def find_by_partial_name(cls, partial_name: str):
         async with async_session_maker() as session:
-            query = select(cls.model).filter(
-                Address.full_address.ilike(
-                    insert_percent_after_each_char(partial_name)
+            query = (
+                select(cls.model)
+                .filter(
+                    Address.full_address.ilike(
+                        insert_percent_after_each_char(partial_name)
+                    )
                 )
+                .limit(5)
             )
             result = await session.execute(query)
             return result.scalars().all()

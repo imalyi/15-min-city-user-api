@@ -3,6 +3,7 @@ from api.dao.base import BaseDAO
 from sqlalchemy.orm import selectinload
 from sqlalchemy import select
 from api.category_collections.models import CategoryCollections
+from api.categories.models import Categories
 from api.database import async_session_maker
 
 
@@ -13,7 +14,12 @@ class CategoryCollectionsDAO(BaseDAO):
     async def find_all(cls, **filter_by):
         async with async_session_maker() as session:
             query = select(CategoryCollections).options(
-                selectinload(CategoryCollections.categories)
+                selectinload(
+                    CategoryCollections.categories.and_(
+                        Categories.is_hidden == False
+                    )
+                )
             )
+
             result = await session.execute(query)
             return result.scalars().all()
