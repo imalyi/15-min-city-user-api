@@ -5,7 +5,7 @@ from api.category_collections.router import (
 )
 from api.addresses.router import router as addresses_router
 from api.pois.router import router as pois_router
-
+from starlette.middleware.cors import CORSMiddleware
 from api.users.router import (
     user_router,
     register_user_router,
@@ -15,7 +15,16 @@ from api.subscriptions.router import router as subscription_router
 
 from api.invite_codes.router import router as invite_codes_router
 
+
 app = FastAPI()
+
+app.add_middleware(
+    middleware_class=CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(categories_router)
 app.include_router(category_collections_router)
