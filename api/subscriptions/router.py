@@ -4,11 +4,12 @@ from api.subscriptions.dao import SubscriptionDAO
 from api.users.user_manager import current_active_user, current_admin_user
 from api.users.models import User
 from fastapi import Depends
+from typing import List
 
 router = APIRouter(prefix="/subscription_levels", tags=["Subscription levels"])
 
 
-@router.get("/", response_model=SubscriptionLevel)
+@router.get("/", response_model=List[SubscriptionLevel])
 async def get_all_subscription_levels(
     user: User = Depends(current_admin_user),
 ):

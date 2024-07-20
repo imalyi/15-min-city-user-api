@@ -1,11 +1,21 @@
 from api.schemas.global_model import GlobalModelWithJSONAlias
-from pydantic import Field
+from pydantic import Field, validator
 from typing import List
 from api.categories.schemas import Category
+import re
 
 
 class CategoryCollectionCreate(GlobalModelWithJSONAlias):
-    title: str
+    title: str = Field(min_length=5, max_length=100)
+
+    @validator("title")
+    def only_characters_and_spaces(cls, v):
+        pattern = re.compile(r"^[A-Za-z ]*$")
+        if bool(pattern.match(v)):
+            return v
+        raise ValueError(
+            "CategoryCollection title can contain only latin characters and spaces"
+        )
 
 
 class CategoryCollection(CategoryCollectionCreate):

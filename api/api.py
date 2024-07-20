@@ -14,7 +14,7 @@ from api.users.router import (
 from api.subscriptions.router import router as subscription_router
 
 from api.invite_codes.router import router as invite_codes_router
-
+from api.users.subscriptions.router import router as users_subscription_router
 
 app = FastAPI()
 
@@ -43,3 +43,4 @@ app.include_router(
 
 app.include_router(subscription_router)
 app.include_router(invite_codes_router)
+app.include_router(users_subscription_router, prefix="/users")

@@ -1,7 +1,6 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Optional
 from functools import lru_cache
-import os
 
 
 class BaseConfig(BaseSettings):
@@ -26,7 +25,7 @@ class ProdConfig(GlobalConfig):
 
 
 class TestConfig(GlobalConfig):
-    DATABASE_URL: str = "sqlite:///test.db"
+    #    DATABASE_URL: str = "sqlite:///test.db"
     DB_FORCE_ROLL_BACK: bool = True
     model_config = SettingsConfigDict(env_prefix="TEST_")
 

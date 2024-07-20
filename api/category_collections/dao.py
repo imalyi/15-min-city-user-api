@@ -11,12 +11,12 @@ class CategoryCollectionsDAO(BaseDAO):
     model = CategoryCollections
 
     @classmethod
-    async def find_all(cls, **filter_by):
+    async def find_all(cls, is_hidden: bool, **filter_by):
         async with async_session_maker() as session:
             query = select(CategoryCollections).options(
                 selectinload(
                     CategoryCollections.categories.and_(
-                        Categories.is_hidden == False
+                        Categories.is_hidden == is_hidden
                     )
                 )
             )

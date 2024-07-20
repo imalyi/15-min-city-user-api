@@ -17,6 +17,7 @@ from api.subscriptions.models import SubscriptionLevel
 from api.users.models import User
 from api.users.subscriptions.models import UserSubscription
 from api.invite_codes.models import InviteCode
+from api.users.history.models import UserHistory
 from alembic import context
 from api.config import config as fastapi_config
 

@@ -6,11 +6,12 @@ from api.pois.dao import POIDAO
 from api.users.user_manager import current_active_user, current_admin_user
 from api.users.models import User
 from fastapi import Depends
+from typing import List
 
 router = APIRouter(prefix="/pois", tags=["Points of interest"])
 
 
-@router.get("/", status_code=200)
+@router.get("/", status_code=200, response_model=List[POI])
 async def get_all_pois(user: User = Depends(current_active_user)):
     return await POIDAO.find_all()
 

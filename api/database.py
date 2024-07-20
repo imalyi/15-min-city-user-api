@@ -7,6 +7,10 @@ from sqlalchemy.orm import DeclarativeBase, mapped_column, sessionmaker
 
 from api.config import config
 
+print(
+    config.DATABASE_URL,
+    "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!_______________________-",
+)
 str_256 = Annotated[str, 256]
 
 pk_int = Annotated[int, mapped_column(primary_key=True)]

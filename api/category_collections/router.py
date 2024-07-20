@@ -11,7 +11,7 @@ from fastapi import Depends
 
 
 router = APIRouter(
-    prefix="/category-collections", tags=["Categories", "Category Collections"]
+    prefix="/category-collections", tags=["Category Collections"]
 )
 
 
@@ -19,7 +19,11 @@ router = APIRouter(
 async def get_all_category_collections(
     user: User = Depends(current_active_user),
 ):
-    result = await CategoryCollectionsDAO.find_all()
+    if user.is_superuser:
+        result = await CategoryCollectionsDAO.find_all(is_hidden=True)
+    else:
+        result = await CategoryCollectionsDAO.find_all(is_hidden=False)
+
     result_dto = [
         CategoryCollection.model_validate(row, from_attributes=True)
         for row in result
