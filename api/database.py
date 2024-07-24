@@ -42,5 +42,7 @@ class Base(DeclarativeBase):
 metadata = sqlalchemy.MetaData()
 
 engine = sqlalchemy.create_engine(
-    config.DATABASE_URL, echo=False, pool_size=15
+    config.DATABASE_URL,
+    echo=False,
+    pool_size=15,
 )

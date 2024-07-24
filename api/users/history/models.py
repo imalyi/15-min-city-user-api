@@ -8,9 +8,9 @@ from datetime import datetime
 
 class UserHistory(Base):
     __tablename__ = "history"
-
+    id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE")
     )
-    request: Mapped[JSONB]
+    request: Mapped[dict] = mapped_column(JSONB)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())

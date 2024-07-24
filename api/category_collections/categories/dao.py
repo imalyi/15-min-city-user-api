@@ -1,4 +1,4 @@
-from api.categories.models import Categories
+from api.category_collections.categories.models import Categories
 from api.dao.base import BaseDAO
 
 

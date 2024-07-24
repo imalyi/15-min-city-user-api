@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 sys.path.insert(0, dirname(dirname(dirname(abspath(__file__)))))
 from api.database import Base
 from api.category_collections.models import CategoryCollections
-from api.categories.models import Categories
+from api.category_collections.categories.models import Categories
 from api.addresses.models import Address
 from api.pois.models import POI, POIAddresses, POICategories
 from api.subscriptions.models import SubscriptionLevel

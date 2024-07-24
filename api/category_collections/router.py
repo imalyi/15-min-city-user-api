@@ -5,7 +5,11 @@ from api.category_collections.schemas import (
 )
 from api.category_collections.dao import CategoryCollectionsDAO
 from typing import List
-from api.users.user_manager import current_active_user, current_admin_user
+from api.users.user_manager import (
+    current_active_user,
+    current_admin_user,
+    current_user_optional,
+)
 from api.users.models import User
 from fastapi import Depends
 
@@ -17,9 +21,9 @@ router = APIRouter(
 
 @router.get("/", status_code=200, response_model=List[CategoryCollection])
 async def get_all_category_collections(
-    user: User = Depends(current_active_user),
+    user: User = Depends(current_user_optional),
 ):
-    if user.is_superuser:
+    if user and user.is_superuser:
         result = await CategoryCollectionsDAO.find_all(is_hidden=True)
     else:
         result = await CategoryCollectionsDAO.find_all(is_hidden=False)

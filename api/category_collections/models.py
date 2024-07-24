@@ -8,8 +8,11 @@ from api.database import (
 from typing import Annotated
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy import ForeignKey, Index, UniqueConstraint
-
+from sqlalchemy.dialects.postgresql import ARRAY
 from typing import List
+from sqlalchemy import func
+from datetime import datetime
+from sqlalchemy import String
 
 
 class CategoryCollections(Base):
@@ -20,4 +23,6 @@ class CategoryCollections(Base):
     categories: Mapped[List["Categories"]] = relationship(
         backref="category_collections"
     )
+    synonims: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     __table_args__ = (UniqueConstraint("title"),)

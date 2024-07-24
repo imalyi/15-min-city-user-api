@@ -8,6 +8,8 @@ from api.database import (
 from typing import Annotated, List
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy import ForeignKey, Index, UniqueConstraint
+from datetime import datetime
+from sqlalchemy import func
 
 
 class Categories(Base):
@@ -23,5 +25,5 @@ class Categories(Base):
     is_default: Mapped[bool] = mapped_column(default=False)
     is_hidden: Mapped[bool] = mapped_column(default=False)
     minimum_subscription_level: Mapped[required_int] = 0
-
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     __table_args__ = (UniqueConstraint("title", "collection_id"),)

@@ -3,7 +3,7 @@ from api.dao.base import BaseDAO
 from sqlalchemy.orm import selectinload
 from sqlalchemy import select
 from api.category_collections.models import CategoryCollections
-from api.categories.models import Categories
+from api.category_collections.categories.models import Categories
 from api.database import async_session_maker
 
 

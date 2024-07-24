@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from api.pois.schemas import POICreate, POI, POIAddress, POICategory
 from api.addresses.schemas import Address
-from api.categories.schemas import Category
+from api.category_collections.categories.schemas import Category
 from api.pois.dao import POIDAO
 from api.users.user_manager import current_active_user, current_admin_user
 from api.users.models import User
@@ -45,7 +45,7 @@ async def attach_poi_to_address(
 
 @router.get("/{poi_id}", status_code=200, response_model=POI)
 async def get_poi(poi_id: int, user: User = Depends(current_active_user)):
-    POIDAO.find_by_id(poi_id)
+    return await POIDAO.find_by_id(poi_id)
 
 
 @router.get(
@@ -54,7 +54,7 @@ async def get_poi(poi_id: int, user: User = Depends(current_active_user)):
 async def get_poi_categories(
     poi_id: int, user: User = Depends(current_admin_user)
 ):
-    pass
+    return await POIDAO.get_poi_categories(poi_id)
 
 
 @router.get(
@@ -63,4 +63,4 @@ async def get_poi_categories(
 async def get_poi_addresses(
     poi_id: int, user: User = Depends(current_admin_user)
 ):
-    pass
+    return await POIDAO.get_poi_addresses(poi_id)

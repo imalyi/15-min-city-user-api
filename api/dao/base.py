@@ -1,6 +1,8 @@
 from api.database import async_session_maker
 from sqlalchemy import select, insert
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy import literal_column
+from api.exceptions.unique import UniqueConstraintException
 
 
 class BaseDAO:
@@ -37,6 +39,9 @@ class BaseDAO:
                     .values(**data)
                     .returning(literal_column("*"))
                 )
-                result = await session.execute(stmt)
-                await session.commit()
+                try:
+                    result = await session.execute(stmt)
+                    await session.commit()
+                except IntegrityError:
+                    raise UniqueConstraintException
         return result.scalar()

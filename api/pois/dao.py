@@ -1,7 +1,7 @@
 from api.dao.base import BaseDAO
 from api.pois.models import POI, POIAddresses, POICategories
 from api.database import async_session_maker
-from sqlalchemy import insert
+from sqlalchemy import insert, select
 
 
 class POIDAO(BaseDAO):
@@ -28,3 +28,17 @@ class POIDAO(BaseDAO):
                 result = await session.execute(stmt)
                 await session.commit()
         return result.scalar()
+
+    @classmethod
+    async def get_poi_categories(cls, poi_id: int):
+        async with async_session_maker() as session:
+            async with session.begin():
+                query = select(POICategories).where(poi_id=poi_id)
+                return await session.execute(query).scalars().all()
+
+    @classmethod
+    async def get_poi_addresses(cls, poi_id: int):
+        async with async_session_maker() as session:
+            async with session.begin():
+                query = select(POIAddresses).where(poi_id=poi_id)
+                return await session.execute(query).scalars().all()

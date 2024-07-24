@@ -3,6 +3,7 @@ from pydantic import ConfigDict
 from pydantic import BaseModel
 
 
+# TODO change name to Base
 class GlobalModelWithJSONAlias(BaseModel):
     """
     Used for every model

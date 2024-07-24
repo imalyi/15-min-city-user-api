@@ -1,4 +1,4 @@
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 from api.schemas.global_model import GlobalModelWithJSONAlias
 import re
 
@@ -15,7 +15,7 @@ class CategoryCreate(GlobalModelWithJSONAlias):
     is_hidden: bool
     order: int = Field(ge=0)
 
-    @validator("title")
+    @field_validator("title")
     def only_characters_and_spaces(cls, v):
         pattern = re.compile(r"^[A-Za-z ]*$")
         if bool(pattern.match(v)):
