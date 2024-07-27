@@ -1,19 +1,22 @@
 from api.database import async_session_maker
 from sqlalchemy import select, insert
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy import literal_column
-from api.exceptions.unique import UniqueConstraintException
+from api.exceptions.unique import DBException
+from asyncpg.exceptions import UniqueViolationError
+from sqlalchemy.exc import IntegrityError
 
 
 class BaseDAO:
     model = None
 
     @classmethod
-    async def find_all(cls, **filter_by):
+    async def find_all(cls, objects_filter=None):
         async with async_session_maker() as session:
-            query = select(cls.model).filter_by(**filter_by)
+            query = select(cls.model)
+            if objects_filter:
+                query = objects_filter.filter(query)
+                query = objects_filter.sort(query)
             result = await session.execute(query)
-            print(result)
             return result.scalars().all()
 
     @classmethod
@@ -34,14 +37,15 @@ class BaseDAO:
     async def insert_data(cls, data: dict):
         async with async_session_maker() as session:
             async with session.begin():
-                stmt = (
-                    insert(cls.model)
-                    .values(**data)
-                    .returning(literal_column("*"))
-                )
                 try:
+                    stmt = (
+                        insert(cls.model)
+                        .values(**data)
+                        .returning(literal_column("*"))
+                    )
+
                     result = await session.execute(stmt)
                     await session.commit()
-                except IntegrityError:
-                    raise UniqueConstraintException
-        return result.scalar()
+                    return result.fetchone()
+                except IntegrityError as err:
+                    raise DBException

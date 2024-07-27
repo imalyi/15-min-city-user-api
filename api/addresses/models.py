@@ -31,7 +31,9 @@ class Address(Base):
     )
 
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
-    modified_at: Mapped[datetime] = mapped_column(server_onupdate=func.now())
+    modified_at: Mapped[datetime] = mapped_column(
+        server_onupdate=func.now(), server_default=func.now(), nullable=True
+    )
 
     __table_args__ = (
         UniqueConstraint(

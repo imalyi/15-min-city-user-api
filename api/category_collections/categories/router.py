@@ -5,6 +5,8 @@ from api.category_collections.categories.schemas import (
 )
 from api.category_collections.categories.dao import CategoryDAO
 from typing import List
+from api.exceptions.unique import DBException
+
 
 categories_router = APIRouter(prefix="/categories", tags=["Categories"])
 category_collections_router = APIRouter(
@@ -34,11 +36,11 @@ async def get_category_by_id(
     return await CategoryDAO.find_by_id(category_id)
 
 
-@categories_router.post("/", status_code=204)
+@categories_router.post("/", status_code=201, response_model=Category)
 async def create_category(
     new_category: CategoryCreate, user: User = Depends(current_admin_user)
 ):
     try:
-        await CategoryDAO.insert_data(new_category.model_dump())
-    except UniqueConstraintException:
+        return await CategoryDAO.insert_data(new_category.model_dump())
+    except DBException:
         raise HTTPException(409, f"Category with {new_category} exists")

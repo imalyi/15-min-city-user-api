@@ -12,7 +12,9 @@ from api.database import Base
 from api.category_collections.models import CategoryCollections
 from api.category_collections.categories.models import Categories
 from api.addresses.models import Address
-from api.pois.models import POI, POIAddresses, POICategories
+from api.pois.models import POI
+from api.pois.categories.models import POICategories
+from api.pois.reviews.models import Review
 from api.subscriptions.models import SubscriptionLevel
 from api.users.models import User
 from api.users.subscriptions.models import UserSubscription

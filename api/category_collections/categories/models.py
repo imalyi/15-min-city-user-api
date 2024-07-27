@@ -15,15 +15,16 @@ from sqlalchemy import func
 class Categories(Base):
     __tablename__ = "categories"
 
-    id: Mapped[pk_int]
-    title: Mapped[str_256]
+    id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str]
     collection_id: Mapped[int] = mapped_column(
         ForeignKey("category_collections.id")
     )
 
-    order: Mapped[required_int]
+    order: Mapped[int]
     is_default: Mapped[bool] = mapped_column(default=False)
     is_hidden: Mapped[bool] = mapped_column(default=False)
-    minimum_subscription_level: Mapped[required_int] = 0
+    minimum_subscription_level: Mapped[required_int]
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
     __table_args__ = (UniqueConstraint("title", "collection_id"),)

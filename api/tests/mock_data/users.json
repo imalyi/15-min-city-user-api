@@ -1,0 +1,20 @@
+[
+    {
+        "email": "admin.user@example.com",
+        "hashed_password": "$argon2id$v=19$m=65536,t=3,p=4$hbeNeEbEAw8Ia1etM2S5cw$XCGxTioDZXhZ2h9nEYwWZ0yrT+fyjgRFnH18CnYvRgg",
+        "is_active": true,
+        "is_superuser": true,
+        "is_verified": true,
+        "subscription_level": 3,
+        "name": "Admin User"
+    },
+    {
+        "email": "regular.user@example.com",
+        "hashed_password": "$argon2id$v=19$m=65536,t=3,p=4$hbeNeEbEAw8Ia1etM2S5cw$XCGxTioDZXhZ2h9nEYwWZ0yrT+fyjgRFnH18CnYvRgg", 
+        "is_active": true,
+        "is_superuser": false,
+        "is_verified": true,
+        "subscription_level": 1,
+        "name": "Regular User"
+    }
+]

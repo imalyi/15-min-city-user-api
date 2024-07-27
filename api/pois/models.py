@@ -8,6 +8,10 @@ from sqlalchemy.orm import mapped_column, Mapped
 from sqlalchemy import ForeignKey, UniqueConstraint
 from datetime import datetime
 from sqlalchemy import func
+from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy import String
+
+# TODO: добавить фильтрацию
 
 
 class POI(Base):
@@ -15,36 +19,16 @@ class POI(Base):
     id: Mapped[pk_int]
     name: Mapped[required_string]
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
-    modified_at: Mapped[datetime] = mapped_column(server_onupdate=func.now())
-
-    __table_args__ = (UniqueConstraint("name"),)
-
-
-class POICategories(Base):
-    __tablename__ = "pois_categories"
-    id: Mapped[pk_int]
-    poi_id: Mapped[required_int] = mapped_column(
-        ForeignKey("pois.id", ondelete="CASCADE")
+    modified_at: Mapped[datetime] = mapped_column(
+        server_onupdate=func.now(), nullable=True
     )
-    category_id: Mapped[required_int] = mapped_column(
-        ForeignKey("categories.id", ondelete="CASCADE")
-    )
-    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
-    modified_at: Mapped[datetime] = mapped_column(server_onupdate=func.now())
-
-    __table_args__ = (UniqueConstraint("poi_id", "category_id"),)
-
-
-class POIAddresses(Base):
-    __tablename__ = "poi_addresses"
-    id: Mapped[pk_int]
-    poi_id: Mapped[required_int] = mapped_column(
-        ForeignKey("pois.id", ondelete="CASCADE")
-    )
+    description: Mapped[str] = mapped_column(nullable=True)
+    opening_hours: Mapped[str] = mapped_column(nullable=True)
+    rating: Mapped[int] = mapped_column(nullable=True)
+    place_id_google_api: Mapped[str] = mapped_column(nullable=True)
+    price_level: Mapped[str] = mapped_column(nullable=True)
+    types: Mapped[list[str]] = mapped_column(ARRAY(String))
     address_id: Mapped[required_int] = mapped_column(
         ForeignKey("addresses.id", ondelete="CASCADE")
     )
-    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
-    modified_at: Mapped[datetime] = mapped_column(server_onupdate=func.now())
-
-    __table_args__ = (UniqueConstraint("address_id", "poi_id"),)
+    __table_args__ = (UniqueConstraint("name", "place_id_google_api"),)
