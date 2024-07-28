@@ -37,15 +37,12 @@ class BaseDAO:
     async def insert_data(cls, data: dict):
         async with async_session_maker() as session:
             async with session.begin():
-                try:
-                    stmt = (
-                        insert(cls.model)
-                        .values(**data)
-                        .returning(literal_column("*"))
-                    )
+                stmt = (
+                    insert(cls.model)
+                    .values(**data)
+                    .returning(literal_column("*"))
+                )
 
-                    result = await session.execute(stmt)
-                    await session.commit()
-                    return result.fetchone()
-                except IntegrityError as err:
-                    raise DBException
+                result = await session.execute(stmt)
+                await session.commit()
+                return result.fetchone()

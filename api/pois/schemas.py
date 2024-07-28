@@ -5,13 +5,9 @@ from pydantic import Field
 
 
 class POICreate(GlobalModelWithJSONAlias):
-    name: str
-    description: Optional[str] = None
-    opening_hours: Optional[str] = None
-    rating: Optional[int] = Field(default=None, ge=1, le=5)
-    place_id_google_api: Optional[str] = None
-    price_level: Optional[str] = None
-    types: Optional[List[str]] = []
+    name: str = Field(min_length=3)
+    data: Optional[dict] = None
+    address_id: int
 
 
 class POI(POICreate):

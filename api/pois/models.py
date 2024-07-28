@@ -10,6 +10,7 @@ from datetime import datetime
 from sqlalchemy import func
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy import String
+from sqlalchemy.dialects.postgresql import JSONB
 
 # TODO: добавить фильтрацию
 
@@ -22,13 +23,9 @@ class POI(Base):
     modified_at: Mapped[datetime] = mapped_column(
         server_onupdate=func.now(), nullable=True
     )
-    description: Mapped[str] = mapped_column(nullable=True)
-    opening_hours: Mapped[str] = mapped_column(nullable=True)
-    rating: Mapped[int] = mapped_column(nullable=True)
-    place_id_google_api: Mapped[str] = mapped_column(nullable=True)
-    price_level: Mapped[str] = mapped_column(nullable=True)
-    types: Mapped[list[str]] = mapped_column(ARRAY(String))
-    address_id: Mapped[required_int] = mapped_column(
-        ForeignKey("addresses.id", ondelete="CASCADE")
+    data: Mapped[dict] = mapped_column(JSONB, nullable=True)
+    address_id: Mapped[int] = mapped_column(
+        ForeignKey("addresses.id", ondelete="CASCADE"), nullable=False
     )
-    __table_args__ = (UniqueConstraint("name", "place_id_google_api"),)
+
+    __table_args__ = (UniqueConstraint("name", "address_id"),)

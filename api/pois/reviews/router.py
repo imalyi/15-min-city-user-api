@@ -12,4 +12,4 @@ router = APIRouter(tags=["Points of interest", "POI Reviews"])
 @router.post("{poi_id}/reviews", status_code=201)
 async def create_review(poi_id: int, new_review: ReviewCreate):
     new_review.poi_id = poi_id
-    ReviewDAO.insert_data(new_review)
+    return await ReviewDAO.insert_data(new_review)

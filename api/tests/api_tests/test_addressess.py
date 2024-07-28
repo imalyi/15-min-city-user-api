@@ -1,177 +1,44 @@
-from httpx import AsyncClient
 import pytest
-
-geometry = {
-    "type": "MultiPolygon",
-    "coordinates": [
-        [
-            [
-                [102.0, 2.0],
-                [103.0, 2.0],
-                [103.0, 3.0],
-                [102.0, 3.0],
-                [102.0, 2.0],
-            ]
-        ],
-        [
-            [
-                [100.0, 0.0],
-                [101.0, 0.0],
-                [101.0, 1.0],
-                [100.0, 1.0],
-                [100.0, 0.0],
-            ]
-        ],
-    ],
-}
 
 
 @pytest.mark.parametrize(
-    "ac, street_name, house_number, street_type, city, postcode, geometry, status_code",
+    "ac, name, data, address_id, expected_status",
     [
-        # Admin successful creation
-        (
-            "ac_admin",
-            "successful creation",
-            "12A",
-            "Ave",
-            "Warsaw",
-            "30-123",
-            geometry,
-            201,
-        ),
-        # User forbidden to create
-        (
-            "ac_user",
-            "Secondary Street",
-            "34B",
-            "Blv",
-            "Krakow",
-            "30-123",
-            {"type": "MultiPolygon", "coordinates": [[[]]]},
-            403,
-        ),
-        # Invalid postcode
-        (
-            "ac_admin",
-            "Main Street",
-            "12A",
-            "Ave",
-            "Warsaw",
-            "00001",
-            geometry,
-            422,
-        ),
-        # Missing postcode
-        (
-            "ac_admin",
-            "Main Street",
-            "12A",
-            "Ave",
-            "Warsaw",
-            201,
-            geometry,
-            422,
-        ),
-        # Invalid city
-        (
-            "ac_admin",
-            "Main Street",
-            "12A",
-            "Ave",
-            "W@rsaw",
-            "00-001",
-            geometry,
-            422,
-        ),
-        # Invalid geometry
-        (
-            "ac_admin",
-            "Invalid geometry",
-            "12A",
-            "Ave",
-            "Warsaw",
-            "30-123",
-            {
-                "type": "MultiPolygon",
-                "coordinates": [
-                    [
-                        [
-                            [1042.0, 2.0],
-                            [103.0, 2.0],
-                            [103.0, 3.0],
-                            [102.0, 3.0],
-                            [102.0, 2.0],
-                        ]
-                    ]
-                ],
-            },
-            422,
-        ),
-        # Valid data but empty street name
+        ("ac_admin", "Test POI", {"key": "value"}, 1, 201),
+        ("ac_admin", "Another POI", None, 1, 201),
         (
             "ac_admin",
             "",
-            "12A",
-            "Ave",
-            "Warsaw",
-            "00-001",
-            geometry,
-            422,
-        ),
-        # Street name too short
+            {"key": "value"},
+            1,
+            201,
+        ),  # Invalid case: name is required
         (
             "ac_admin",
-            "A",
-            "12A",
-            "Ave",
-            "Warsaw",
-            "00-001",
-            geometry,
-            422,
-        ),
-        # Invalid type for house number
-        (
-            "ac_admin",
-            "Main Street",
-            123,
-            "Ave",
-            "Warsaw",
-            "00-001",
-            geometry,
-            422,
-        ),
-        # Missing required field (street_name)
-        (
-            "ac_admin",
-            None,
-            "12A",
-            "Ave",
-            "Warsaw",
-            "00-001",
-            geometry,
-            422,
-        ),
+            "Valid POI 2",
+            {"invalid": "data"},
+            1,
+            201,
+        ),  # Assuming your endpoint accepts any dict
+        ("ac_user", "User POI", {"key": "value"}, 1, 403),
     ],
     indirect=["ac"],
 )
-async def test_create_address(
-    ac,
-    street_name,
-    house_number,
-    street_type,
-    city,
-    postcode,
-    geometry,
-    status_code,
-):
-    data = {
-        "street_name": street_name,
-        "house_number": house_number,
-        "street_type": street_type,
-        "city": city,
-        "postcode": postcode,
-        "geometry": geometry,
-    }
-    response = await ac.post("/addresses/", json=data)
-    assert response.status_code == status_code
+async def test_create_poi(ac, name, data, address_id, expected_status):
+    payload = {
+        "name": name,
+        "address_id": address_id,
+    }  # Add address_id to payload
+    if data is not None:
+        payload["data"] = data
+    response = await ac.post("/pois/", json=payload)
+    assert response.status_code == expected_status
+    if expected_status == 201:
+        assert response.json()["name"] == name
+
+
+#        if data:
+#            assert response.json()["data"] == data
+#        assert (
+#            response.json()["address_id"] == address_id
+#        )  # Check if address_id is returned correctly

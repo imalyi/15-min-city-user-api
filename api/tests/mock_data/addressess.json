@@ -1,0 +1,26 @@
+[
+    {
+      "street_name": "Mazowiecka",
+      "house_number": "10A",
+      "street_type": "Avenue",
+      "city": "Warszawa",
+      "postcode": "00-123",
+      "geometry": "SRID=4326;MULTIPOLYGON(((21.012229 52.229676, 21.012429 52.229876, 21.012629 52.229676, 21.012429 52.229476, 21.012229 52.229676)))"
+    },
+    {
+      "street_name": "Krakowska",
+      "house_number": "25B",
+      "street_type": "Street",
+      "city": "Kraków",
+      "postcode": "30-456",
+      "geometry": "SRID=4326;MULTIPOLYGON(((19.944544 50.064650, 19.944744 50.064850, 19.944944 50.064650, 19.944744 50.064450, 19.944544 50.064650)))"
+    },
+    {
+      "street_name": "Gdańska",
+      "house_number": "3",
+      "street_type": "Boulevard",
+      "city": "Gdańsk",
+      "postcode": "80-001",
+      "geometry": "SRID=4326;MULTIPOLYGON(((18.646638 54.352025, 18.646838 54.352225, 18.647038 54.352025, 18.646838 54.351825, 18.646638 54.352025)))"
+    }
+  ]

@@ -63,6 +63,7 @@ async def prepare_database(event_loop):
     category_collections = open_mock_json("category_collections")
     categories = open_mock_json("categories")
     users = open_mock_json("users")
+    addresses = open_mock_json("addressess")
     async with async_session_maker() as session:
         try:
 
@@ -71,9 +72,11 @@ async def prepare_database(event_loop):
             )
             add_categories = insert(Categories).values(categories)
             add_users = insert(User).values(users)
+            add_addressess = insert(Address).values(addresses)
             await session.execute(add_category_collections)
             await session.execute(add_categories)
             await session.execute(add_users)
+            await session.execute(add_addressess)
             await session.commit()
             logger.info("Test data committed to the database")
         except Exception as e:
