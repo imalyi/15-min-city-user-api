@@ -19,7 +19,7 @@ class CategoryCollections(Base):
     __tablename__ = "category_collections"
     id: Mapped[pk_int]
     title: Mapped[required_string]
-
+    order: Mapped[int]
     categories: Mapped[List["Categories"]] = relationship(
         backref="category_collections"
     )

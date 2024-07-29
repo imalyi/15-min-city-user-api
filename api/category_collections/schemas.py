@@ -13,6 +13,7 @@ from datetime import datetime
 class CategoryCollectionCreate(GlobalModelWithJSONAlias):
     title: str = Field(min_length=5, max_length=100)
     synonims: Optional[List[str]] = None
+    order: int
 
     @field_validator("title")
     def only_characters_and_spaces(cls, v):
