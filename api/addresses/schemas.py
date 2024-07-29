@@ -9,18 +9,10 @@ from api.addresses.models import Address as AddressModel
 
 
 class CommonAddressAttributes(GlobalModelWithJSONAlias):
-    street_name: str = Field(min_length=5, max_length=150)
+    street_name: str = Field(min_length=3, max_length=150)
     house_number: str = Field(min_length=1, max_length=150)
-    street_type: Optional[str] = None
     city: str = Field(min_length=3, max_length=150)
     postcode: Optional[str] = None
-
-    #    @validator("street_name", "street_number")
-    #    def street_validator(cls, v):
-    #        pattern = re.compile(r"^[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż. 0-9]+$")
-    #        if bool(pattern.match(v)):
-    #            return v
-    #        raise ValueError("Street can contain only polish letters, and '.'")
 
     @field_validator("city")
     def city_validator(cls, v):
@@ -49,6 +41,8 @@ class AddressCreate(CommonAddressAttributes):
 
 # TODO custom alias name generator
 class AddressFilter(Filter, GlobalModelWithJSONAlias):
+    lat: Optional[float] = None
+    lon: Optional[float] = None
     street_name: Optional[str] = None
     street_type: Optional[str] = None
     house_number: Optional[str] = None

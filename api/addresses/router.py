@@ -9,6 +9,7 @@ from api.users.models import User
 from fastapi import Depends
 from api.addresses.schemas import AddressFilter
 from fastapi_filter import FilterDepends
+from typing import Union
 
 router = APIRouter(prefix="/addresses", tags=["Addresses"])
 
@@ -22,11 +23,15 @@ async def create_address(
     return await AddressDAO.insert_data(data)
 
 
-@router.get("/", status_code=200, response_model=List[Address])
+@router.get(
+    "/", status_code=200, response_model=Union[List[Address], Address, None]
+)
 async def get_all_addresses(
     filters: AddressFilter = FilterDepends(AddressFilter),
     user: User = Depends(current_active_user),
 ):
+    if filters.lon and filters.lat:
+        return await AddressDAO.find_by_point(filters)
     return await AddressDAO.find_all(filters)
 
 

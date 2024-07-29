@@ -17,7 +17,6 @@ from sqlalchemy import String
 class Address(Base):
     __tablename__ = "addresses"
     id: Mapped[pk_int]
-    street_type: Mapped[str] = mapped_column(nullable=True)
     street_name: Mapped[required_string]
     house_number: Mapped[required_string]
     city: Mapped[required_string]
@@ -26,7 +25,7 @@ class Address(Base):
     full_address: Mapped[str] = mapped_column(
         String,
         Computed(
-            "COALESCE(street_type || ' ', '') || street_name || ' ' || house_number || ', ' || city || COALESCE(', ' || postcode, '')"
+            "COALESCE(street_name || ' ' || house_number || ', ' || city || COALESCE(', ' || postcode, '')"
         ),
     )
 
@@ -37,7 +36,6 @@ class Address(Base):
 
     __table_args__ = (
         UniqueConstraint(
-            "street_type",
             "street_name",
             "house_number",
             "city",
