@@ -29,9 +29,9 @@ async def get_all_category_collections(
     ),
 ):
     if not user or not user.is_superuser:
-        result = await CategoryCollectionsDAO.find_all(is_hidden=True)
-    else:
         result = await CategoryCollectionsDAO.find_all(is_hidden=False)
+    else:
+        result = await CategoryCollectionsDAO.find_all(is_hidden=True)
     result_dto = [
         CategoryCollection.model_validate(row, from_attributes=True)
         for row in result
