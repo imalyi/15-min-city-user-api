@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, UploadFile, File
 from typing import List
 from geoalchemy2 import WKTElement
 from api.addresses.dao import AddressDAO
@@ -10,6 +10,8 @@ from fastapi import Depends
 from api.addresses.schemas import AddressFilter
 from fastapi_filter import FilterDepends
 from typing import Union
+import json
+
 
 router = APIRouter(prefix="/addresses", tags=["Addresses"])
 
@@ -21,6 +23,23 @@ async def create_address(
     data = new_address.model_dump()
     data["geometry"] = WKTElement(new_address.geometry.wkt, srid=4326)
     return await AddressDAO.insert_data(data)
+
+
+@router.post("/from_file", status_code=201, response_model=int)
+async def create_addresses_from_file(
+    file: UploadFile = File(...), user: User = Depends(current_admin_user)
+):
+    content = await file.read()
+    content = json.loads(content)
+    i = 0
+    for address in content:
+        try:
+            address = AddressCreate.model_validate(address)
+            result = await create_address(address, user)
+            i += 1
+        except Exception as err:
+            print(err, address)
+    return len(content) - i
 
 
 @router.get(
