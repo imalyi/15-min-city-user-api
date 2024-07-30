@@ -21,7 +21,7 @@ class AddressDAO(BaseDAO):
                 ST_Contains(Address.geometry, ST_GeomFromWKB(point_wkb, 4326))
             )
             result = await session.execute(query)
-            result = result.scalar_one_or_none()
+            result = result.first()
             if result:
                 return result
             query = (
