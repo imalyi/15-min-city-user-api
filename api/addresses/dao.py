@@ -34,4 +34,4 @@ class AddressDAO(BaseDAO):
                 .limit(1)
             )
             result = await session.execute(query)
-            return result.scalar_one_or_none()
+            return result.first()
