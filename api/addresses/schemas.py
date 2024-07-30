@@ -23,6 +23,8 @@ class CommonAddressAttributes(GlobalModelWithJSONAlias):
 
     @field_validator("postcode")
     def validate_postcode(cls, v):
+        if not v:
+            return v
         pattern = re.compile(r"^[0-9]{2}-[0-9]{3}$")
         if bool(pattern.match(v)):
             return v
