@@ -4,6 +4,6 @@ from api.config import config
 
 celery = Celery(
     "tasks",
-    broker="redis://:@node:6379",
+    broker=config.REDIS_URL,
     include=["api.tasks.tasks"],
 )
