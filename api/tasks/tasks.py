@@ -1,9 +1,10 @@
 from api.tasks.celery import celery
 import openrouteservice as ors
+from api.config import config
 
 
 def calc_distance(from_, to):
-    client = ors.Client(key="", base_url="http://node:8080/ors")
+    client = ors.Client(key="", base_url=config.ORS_URL)
 
     coordinates = [from_, to]
     response = client.directions(
@@ -15,7 +16,6 @@ def calc_distance(from_, to):
     return response.get("routes")[0].get("summary", {}).get("distance", -1)
 
 
-@celery.task
 def generate_report(nearest_pois: dict):
     from_ = [
         nearest_pois.get("start_point", {}).get("lon"),
