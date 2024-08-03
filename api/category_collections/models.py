@@ -21,8 +21,14 @@ class CategoryCollections(Base):
     title: Mapped[required_string]
     order: Mapped[int]
     categories: Mapped[List["Categories"]] = relationship(
-        backref="category_collections"
+        back_populates="collection", lazy="joined"
     )
     synonims: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=True)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
     __table_args__ = (UniqueConstraint("title"),)
+
+    def to_dict(self):
+        return {
+            "title": self.title,
+        }

@@ -12,6 +12,7 @@ import geoalchemy2
 from datetime import datetime
 from sqlalchemy import func
 from sqlalchemy import String
+from sqlalchemy.orm import relationship
 
 
 class Address(Base):
@@ -28,7 +29,7 @@ class Address(Base):
             "COALESCE(street_name || ' ' || house_number || ', ' || city || COALESCE(', ' || postcode, '')"
         ),
     )
-
+    pois: Mapped["POI"] = relationship(back_populates="address", lazy="joined")
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     modified_at: Mapped[datetime] = mapped_column(
         server_onupdate=func.now(), server_default=func.now(), nullable=True
@@ -41,3 +42,12 @@ class Address(Base):
             "city",
         ),
     )
+
+    def to_dict(self):
+        return {
+            "city": self.city,
+            "street_name": self.street_name,
+            "house_number": self.house_number,
+            "postcode": self.postcode,
+            "full_address": self.full_address,
+        }

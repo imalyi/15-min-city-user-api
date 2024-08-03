@@ -1,29 +1,40 @@
-from api.database import (
-    Base,
-    pk_int,
-    required_int,
-    required_string,
+from sqlalchemy import (
+    Column,
+    Integer,
+    ForeignKey,
+    DateTime,
+    Table,
+    UniqueConstraint,
+    create_engine,
+    func,
 )
-from sqlalchemy.orm import mapped_column, Mapped
-from sqlalchemy import ForeignKey, UniqueConstraint
+from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 from datetime import datetime
-from sqlalchemy import func
-from sqlalchemy.dialects.postgresql import ARRAY
-from sqlalchemy import String
+from api.database import Base
 
-
-class POICategories(Base):
-    __tablename__ = "pois_categories"
-    id: Mapped[pk_int]
-    poi_id: Mapped[required_int] = mapped_column(
-        ForeignKey("pois.id", ondelete="CASCADE")
-    )
-    category_id: Mapped[required_int] = mapped_column(
-        ForeignKey("categories.id", ondelete="CASCADE")
-    )
-    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
-    modified_at: Mapped[datetime] = mapped_column(
-        server_onupdate=func.now(), nullable=True
-    )
-
-    __table_args__ = (UniqueConstraint("poi_id", "category_id"),)
+# Define the association table with timestamps
+poi_category_association_table = Table(
+    "pois_categories",
+    Base.metadata,
+    Column(
+        "poi_id",
+        Integer,
+        ForeignKey("pois.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+    Column(
+        "category_id",
+        Integer,
+        ForeignKey("categories.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+    Column("created_at", DateTime, server_default=func.now()),
+    Column(
+        "modified_at",
+        DateTime,
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=True,
+    ),
+    UniqueConstraint("poi_id", "category_id"),
+)

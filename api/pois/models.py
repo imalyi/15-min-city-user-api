@@ -11,8 +11,9 @@ from sqlalchemy import func
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy import String
 from sqlalchemy.dialects.postgresql import JSONB
-
-# TODO: добавить фильтрацию
+from sqlalchemy.orm import relationship
+from api.pois.categories.models import poi_category_association_table
+from typing import List
 
 
 class POI(Base):
@@ -27,5 +28,12 @@ class POI(Base):
     address_id: Mapped[int] = mapped_column(
         ForeignKey("addresses.id", ondelete="CASCADE"), nullable=False
     )
-
+    address: Mapped["Address"] = relationship(
+        back_populates="pois", uselist=False, lazy="joined"
+    )
+    categories: Mapped[List["Categories"]] = relationship(
+        back_populates="pois",
+        secondary=poi_category_association_table,
+        lazy="joined",
+    )
     __table_args__ = (UniqueConstraint("name", "address_id"),)

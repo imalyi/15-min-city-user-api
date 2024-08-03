@@ -10,7 +10,6 @@ from api.tasks.tasks import generate_report
 from api.addresses.router import get_address_by_id
 from api.category_collections.categories.router import get_category_by_id
 from api.pois.models import POI
-from api.pois.categories.models import POICategories
 from sqlalchemy import select
 from api.report.dao import ReportDAO
 
@@ -58,7 +57,7 @@ async def check_user_permission_on_report(
 
 
 @router.post("/")
-async def generate_router(
+async def generate_report_geojson(
     report_request: ReportCreate,
     user: User | None = Depends(current_user_optional),
 ):
@@ -73,10 +72,9 @@ async def generate_router(
     if not is_user_have_permission_for_categories:
         raise HTTPException(403, f"User dont have permission on category")
 
-    address = await get_address_by_id(report_request.address_id)
-    address = address.full_address
     nearest_pois = await ReportDAO.get_nearest_pois(report_request)
-    print(nearest_pois)
-    generate_report.delay(
-        address,
+    nearest_pois_dict = await ReportDAO.create_dict(
+        nearest_pois, report_request
     )
+    generate_report(nearest_pois_dict)
+    return await ReportDAO.generate_geojson(nearest_pois_dict)

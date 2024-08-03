@@ -15,6 +15,8 @@ from fastapi import Depends
 from fastapi_filter import FilterDepends
 from api.category_collections.schemas import CategoryCollectionFilter
 from api.exceptions.unique import DBException
+from api.category_collections.categories.dao import CategoryDAO
+from api.category_collections.categories.schemas import CategoryCreate
 
 router = APIRouter(
     prefix="/category-collections", tags=["Category Collections"]
@@ -51,3 +53,12 @@ async def create_category_collection(
         )
     except DBException:
         raise HTTPException(409, "Category collection exists")
+
+
+# @router.post("/{collection_id}/categories")
+# async def create_category_in_collection(
+#    collection_id: int,
+#    new_category: CategoryCreate,
+# user: User = Depends(current_admin_user)
+# ):
+#    res = await CategoryCollectionsDAO.find_by_id(collection_id)ы
