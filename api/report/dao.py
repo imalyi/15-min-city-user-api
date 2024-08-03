@@ -47,7 +47,10 @@ class ReportDAO:
                 .join(Address, POI.address_id == Address.id)
                 .join(POI.categories)
                 .where(Categories.id == report_request.category_ids[0])
-                .where(ST_Distance(Address.geometry, point) * 111000 < 2000000)
+                .where(
+                    ST_Distance(Address.geometry, point) * 111000
+                    < report_request.distance
+                )
                 .options(joinedload(POI.address), joinedload(POI.categories))
             )
 
