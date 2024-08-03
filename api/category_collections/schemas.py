@@ -17,7 +17,7 @@ class CategoryCollectionCreate(GlobalModelWithJSONAlias):
 
     @field_validator("title")
     def only_characters_and_spaces(cls, v):
-        pattern = re.compile(r"^[A-Za-z ]*$")
+        pattern = re.compile(r"^[A-Za-z, ]*$")
         if bool(pattern.match(v)):
             return v
         raise ValueError(
