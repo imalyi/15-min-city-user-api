@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from api.category_collections.categories.schemas import Category
-from api.pois.dao import POIDAO
+from api.pois.categories.dao import POICategoriesDAO
 from api.users.user_manager import current_active_user, current_admin_user
 from api.users.models import User
 from fastapi import Depends
@@ -17,7 +17,7 @@ router = APIRouter(
 async def attach_poi_to_category(
     poi_id: int, category_id: int, user: User = Depends(current_admin_user)
 ):
-    await POIDAO.connect_to_category(poi_id, category_id)
+    await POICategoriesDAO.connect_to_category(poi_id, category_id)
 
 
 @router.get(
