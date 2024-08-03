@@ -2,11 +2,12 @@ from fastapi import APIRouter, HTTPException
 from api.category_collections.categories.schemas import (
     CategoryCreate,
     Category,
+    CategoryFilter,
 )
 from api.category_collections.categories.dao import CategoryDAO
 from typing import List
 from api.exceptions.unique import DBException
-
+from fastapi_filter import FilterDepends
 
 categories_router = APIRouter(prefix="/categories", tags=["Categories"])
 category_collections_router = APIRouter(
@@ -23,8 +24,11 @@ from api.exceptions.unique import UniqueConstraintException
 
 
 @categories_router.get("/", status_code=200, response_model=List[Category])
-async def get_all_categories(user: User = Depends(current_admin_user)):
-    return await CategoryDAO.find_all()
+async def get_all_categories(
+    filters: CategoryFilter = FilterDepends(CategoryFilter),
+    user: User = Depends(current_admin_user),
+):
+    return await CategoryDAO.find_all(filters)
 
 
 @categories_router.get(

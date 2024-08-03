@@ -5,7 +5,7 @@ from fastapi_filter.contrib.sqlalchemy import Filter
 from api.category_collections.categories.models import (
     Categories as CategoriesModel,
 )
-from typing import Optional
+from typing import Optional, List
 
 # TODO: use Annotated for title validation
 
@@ -37,7 +37,8 @@ class Category(CategoryCreate):
 
 class CategoryFilter(Filter):
     title: Optional[str] = None
-    collection_id: Optional[int]
+    collection_id: Optional[int] = None
+    order_by: List[str] = ["title"]
 
     class Constants(Filter.Constants):
         model = CategoriesModel

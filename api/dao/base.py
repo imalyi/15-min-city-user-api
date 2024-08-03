@@ -17,7 +17,7 @@ class BaseDAO:
                 query = objects_filter.filter(query)
                 query = objects_filter.sort(query)
             result = await session.execute(query)
-            return result.scalars().all()
+            return result.scalars().unique().all()
 
     @classmethod
     async def find_one_or_none(cls, **filter_by):
