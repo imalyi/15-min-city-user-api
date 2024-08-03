@@ -76,5 +76,5 @@ async def generate_report_geojson(
     nearest_pois_dict = await ReportDAO.create_dict(
         nearest_pois, report_request
     )
-    generate_report(nearest_pois_dict)
+    generate_report.delay(nearest_pois_dict)
     return await ReportDAO.generate_geojson(nearest_pois_dict)

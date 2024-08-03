@@ -15,7 +15,7 @@ def calc_distance(from_, to):
     return response.get("routes")[0].get("summary", {}).get("distance", -1)
 
 
-# @celery.task
+@celery.task
 def generate_report(nearest_pois: dict):
     from_ = [
         nearest_pois.get("start_point", {}).get("lon"),
@@ -35,4 +35,4 @@ def generate_report(nearest_pois: dict):
                 ] = distance
                 i += 1
 
-    print(nearest_pois)
+    return nearest_pois
