@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, Response, Request
 from api.users.user_manager import current_user_optional
 from fastapi import Depends
 from api.users.models import User
@@ -13,6 +13,8 @@ from api.pois.models import POI
 from sqlalchemy import select
 from api.report.dao import ReportDAO
 from celery.result import AsyncResult
+from fastapi.responses import JSONResponse
+
 
 router = APIRouter(prefix="/report", tags=["Report"])
 
@@ -82,35 +84,45 @@ async def generate_report_geojson(
 
 
 @router.get("/{task_id}", status_code=200)
-async def get_task_result(task_id: str):
+async def get_task_result(task_id: str, request: Request):
     result = AsyncResult(task_id)
 
+    # Определите, какой формат ответа требуется
+    accept_header = request.headers.get("accept", "application/json")
+
     if result.state == "PENDING":
-        # Task hasn't been started yet
-        return Response(
-            {"task_id": task_id, "status": "Pending", "result": None},
-            status_code=202,
-        )
+        response_data = {
+            "task_id": task_id,
+            "status": "Pending",
+            "result": None,
+        }
+        return JSONResponse(content=response_data, status_code=202)
     elif result.state == "FAILURE":
-        # Task failed
-        return Response(
-            {
-                "task_id": task_id,
-                "status": "Failed",
-                "result": str(result.info),
-            },
-            status_code=500,
-        )
+        response_data = {
+            "task_id": task_id,
+            "status": "Failed",
+            "result": str(result.info),
+        }
+        return JSONResponse(content=response_data, status_code=500)
     elif result.state == "SUCCESS":
-        # Task succeeded
-        return {
+        # Получите нужный элемент из словаря result
+        response_data = {
             "task_id": task_id,
             "status": "Success",
             "result": result.result,
         }
+
+        if accept_header == "application/geojson":
+            # Предположим, что geojson это ключ в result.result
+            geojson_data = response_data.get("result", {}).get("geojson", {})
+            return JSONResponse(content=geojson_data)
+        else:
+            # По умолчанию возвращаем полный результат
+            return JSONResponse(content=response_data)
     else:
-        # Task is still running
-        return Response(
-            {"task_id": task_id, "status": result.state, "result": None},
-            status_code=202,
-        )
+        response_data = {
+            "task_id": task_id,
+            "status": result.state,
+            "result": None,
+        }
+        return JSONResponse(content=response_data, status_code=202)
