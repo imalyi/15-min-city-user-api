@@ -116,9 +116,13 @@ async def get_task_result(task_id: str, request: Request):
             # Предположим, что geojson это ключ в result.result
             geojson_data = response_data.get("result", {}).get("geojson", {})
             return JSONResponse(content=geojson_data)
-        else:
-            # По умолчанию возвращаем полный результат
+        elif accept_header == "application/json":
+            json_ = response_data.get("result", {}).get("full", {})
+            return JSONResponse(content=json_)
+        elif accept_header == "application/json+geojson":
             return JSONResponse(content=response_data)
+        else:
+            raise HTTPException(422, "Header accept is not set")
     else:
         response_data = {
             "task_id": task_id,
