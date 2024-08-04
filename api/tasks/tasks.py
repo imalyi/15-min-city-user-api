@@ -75,4 +75,4 @@ def generate_report(nearest_pois: dict):
                 ] = distance
                 i += 1
 
-    return generate_geojson(nearest_pois)
+    return {"full": nearest_pois, "geojson": generate_geojson(nearest_pois)}
