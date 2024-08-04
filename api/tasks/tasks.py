@@ -2,6 +2,9 @@ from api.tasks.celery import celery
 import openrouteservice as ors
 from api.config import config
 
+from celery import shared_task
+from geojson import Feature, Point, FeatureCollection
+
 
 def calc_distance(from_, to):
     client = ors.Client(key="", base_url=config.ORS_URL)
@@ -16,6 +19,43 @@ def calc_distance(from_, to):
     return response.get("routes")[0].get("summary", {}).get("distance", -1)
 
 
+def generate_geojson(nearest_points_dict):
+    features = []
+
+    # Add start_point as a GeoJSON feature
+    if "start_point" in nearest_points_dict:
+        start_point = nearest_points_dict["start_point"]
+        point = Point((start_point["lon"], start_point["lat"]))
+        features.append(
+            Feature(geometry=point, properties={"name": "Start Point"})
+        )
+
+    # Add POIs as GeoJSON features
+    if "pois" in nearest_points_dict:
+        for collection_title, categories in nearest_points_dict[
+            "pois"
+        ].items():
+            for category_title, pois in categories.items():
+                for poi in pois:
+                    point = Point(
+                        (poi["location"]["lon"], poi["location"]["lat"])
+                    )
+                    properties = {
+                        "name": poi["name"],
+                        "address": poi["address"],
+                        "category": category_title,
+                        "collection": collection_title,
+                    }
+                    features.append(
+                        Feature(geometry=point, properties=properties)
+                    )
+
+    # Create GeoJSON FeatureCollection
+    geojson_obj = FeatureCollection(features)
+    return geojson_obj
+
+
+@shared_task
 def generate_report(nearest_pois: dict):
     from_ = [
         nearest_pois.get("start_point", {}).get("lon"),
@@ -35,4 +75,4 @@ def generate_report(nearest_pois: dict):
                 ] = distance
                 i += 1
 
-    return nearest_pois
+    return generate_geojson(nearest_pois)

@@ -23,7 +23,6 @@ from geoalchemy2.functions import (
     ST_DWithin,
     ST_Centroid,
 )
-from geojson import Feature, Point, FeatureCollection
 
 
 class ReportDAO:
@@ -108,39 +107,3 @@ class ReportDAO:
             f"POINT({point.get('lon')} {point.get('lat')})",
             4326,
         )
-
-    @classmethod
-    async def generate_geojson(cls, nearest_points_dict):
-        features = []
-
-        # Add start_point as a GeoJSON feature
-        if "start_point" in nearest_points_dict:
-            start_point = nearest_points_dict["start_point"]
-            point = Point((start_point["lon"], start_point["lat"]))
-            features.append(
-                Feature(geometry=point, properties={"name": "Start Point"})
-            )
-
-        # Add POIs as GeoJSON features
-        if "pois" in nearest_points_dict:
-            for collection_title, categories in nearest_points_dict[
-                "pois"
-            ].items():
-                for category_title, pois in categories.items():
-                    for poi in pois:
-                        point = Point(
-                            (poi["location"]["lon"], poi["location"]["lat"])
-                        )
-                        properties = {
-                            "name": poi["name"],
-                            "address": poi["address"],
-                            "category": category_title,
-                            "collection": collection_title,
-                        }
-                        features.append(
-                            Feature(geometry=point, properties=properties)
-                        )
-
-        # Create GeoJSON FeatureCollection
-        geojson_obj = FeatureCollection(features)
-        return geojson_obj

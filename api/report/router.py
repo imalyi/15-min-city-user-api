@@ -12,6 +12,7 @@ from api.category_collections.categories.router import get_category_by_id
 from api.pois.models import POI
 from sqlalchemy import select
 from api.report.dao import ReportDAO
+from celery.result import AsyncResult
 
 router = APIRouter(prefix="/report", tags=["Report"])
 
@@ -56,7 +57,7 @@ async def check_user_permission_on_report(
     return True
 
 
-@router.post("/")
+@router.post("/", status_code=202, response_model=str)
 async def generate_report_geojson(
     report_request: ReportCreate,
     user: User | None = Depends(current_user_optional),
@@ -76,5 +77,31 @@ async def generate_report_geojson(
     nearest_pois_dict = await ReportDAO.create_dict(
         nearest_pois, report_request
     )
-    generate_report(nearest_pois_dict)
-    return await ReportDAO.generate_geojson(nearest_pois_dict)
+    res = generate_report.delay(nearest_pois_dict)
+    return res.id
+
+
+@router.get("/{task_id}")
+async def get_task_result(task_id: str):
+    result = AsyncResult(task_id)
+
+    if result.state == "PENDING":
+        # Task hasn't been started yet
+        return {"task_id": task_id, "status": "Pending", "result": None}
+    elif result.state == "FAILURE":
+        # Task failed
+        return {
+            "task_id": task_id,
+            "status": "Failed",
+            "result": str(result.info),
+        }
+    elif result.state == "SUCCESS":
+        # Task succeeded
+        return {
+            "task_id": task_id,
+            "status": "Success",
+            "result": result.result,
+        }
+    else:
+        # Task is still running
+        return {"task_id": task_id, "status": result.state, "result": None}
