@@ -1,18 +1,12 @@
+from geoalchemy2.functions import ST_X, ST_Y, ST_Centroid, ST_Distance
+from sqlalchemy import func, select
+from sqlalchemy.orm import joinedload
+
+from api.addresses.models import Address
+from api.category_collections.categories.models import Categories
 from api.database import async_session_maker
 from api.pois.models import POI
-from sqlalchemy import select, func
-from api.category_collections.categories.models import Categories
-from api.addresses.models import Address
-from geoalchemy2.functions import (
-    ST_X,
-    ST_Y,
-)
 from api.report.schemas import ReportCreate
-from sqlalchemy.orm import joinedload
-from geoalchemy2.functions import (
-    ST_Distance,
-    ST_Centroid,
-)
 
 
 class ReportDAO:

@@ -1,9 +1,6 @@
+from sqlalchemy import insert, literal_column, select
+
 from api.database import async_session_maker
-from sqlalchemy import select, insert
-from sqlalchemy import literal_column
-from api.exceptions.unique import DBException
-from asyncpg.exceptions import UniqueViolationError
-from sqlalchemy.exc import IntegrityError
 
 
 class BaseDAO:

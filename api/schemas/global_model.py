@@ -1,6 +1,5 @@
+from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
-from pydantic import ConfigDict
-from pydantic import BaseModel
 
 
 # TODO change name to Base

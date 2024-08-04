@@ -1,22 +1,21 @@
 from fastapi import FastAPI
+from starlette.middleware.cors import CORSMiddleware
+
+from api.addresses.router import router as addresses_router
 from api.category_collections.categories.router import categories_router
 from api.category_collections.router import (
     router as category_collections_router,
 )
-from api.addresses.router import router as addresses_router
-from api.pois.router import router as pois_router
-from starlette.middleware.cors import CORSMiddleware
-from api.users.router import (
-    user_router,
-    register_user_router,
-    auth_user_router,
-)
-from api.subscriptions.router import router as subscription_router
-
 from api.invite_codes.router import router as invite_codes_router
-from api.users.subscriptions.router import router as users_subscription_router
-
+from api.pois.router import router as pois_router
 from api.report.router import router as report_router
+from api.subscriptions.router import router as subscription_router
+from api.users.router import (
+    auth_user_router,
+    register_user_router,
+    user_router,
+)
+from api.users.subscriptions.router import router as users_subscription_router
 
 app = FastAPI()
 

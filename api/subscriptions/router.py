@@ -1,10 +1,11 @@
-from fastapi import APIRouter
-from api.subscriptions.schema import SubscriptionLevelCreate, SubscriptionLevel
-from api.subscriptions.dao import SubscriptionDAO
-from api.users.user_manager import current_active_user, current_admin_user
-from api.users.models import User
-from fastapi import Depends
 from typing import List
+
+from fastapi import APIRouter, Depends
+
+from api.subscriptions.dao import SubscriptionDAO
+from api.subscriptions.schema import SubscriptionLevel, SubscriptionLevelCreate
+from api.users.models import User
+from api.users.user_manager import current_admin_user
 
 router = APIRouter(prefix="/subscription_levels", tags=["Subscription levels"])
 

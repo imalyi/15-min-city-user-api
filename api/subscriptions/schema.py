@@ -1,5 +1,6 @@
-from api.schemas.global_model import GlobalModelWithJSONAlias
 from pydantic import Field, computed_field
+
+from api.schemas.global_model import GlobalModelWithJSONAlias
 
 
 class SubscriptionLevelCreate(GlobalModelWithJSONAlias):

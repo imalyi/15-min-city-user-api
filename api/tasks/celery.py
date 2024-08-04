@@ -1,6 +1,6 @@
 from celery import Celery
-from api.config import config
 
+from api.config import config
 
 celery = Celery(
     "tasks",

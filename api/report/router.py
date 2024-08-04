@@ -1,15 +1,13 @@
-from fastapi import APIRouter, Request
-from api.users.user_manager import current_user_optional
-from fastapi import Depends
-from api.users.models import User
-from fastapi import HTTPException
-from api.report.schemas import ReportCreate
-from api.tasks.tasks import generate_report
-from api.category_collections.categories.router import get_category_by_id
-from api.report.dao import ReportDAO
 from celery.result import AsyncResult
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
 
+from api.category_collections.categories.router import get_category_by_id
+from api.report.dao import ReportDAO
+from api.report.schemas import ReportCreate
+from api.tasks.tasks import generate_report
+from api.users.models import User
+from api.users.user_manager import current_user_optional
 
 router = APIRouter(prefix="/report", tags=["Report"])
 

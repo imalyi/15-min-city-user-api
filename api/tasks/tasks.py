@@ -1,8 +1,8 @@
 import openrouteservice as ors
-from api.config import config
-
 from celery import shared_task
-from geojson import Feature, Point, FeatureCollection
+from geojson import Feature, FeatureCollection, Point
+
+from api.config import config
 
 
 def calc_distance(from_, to):
