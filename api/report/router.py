@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Response
 from api.users.user_manager import current_user_optional
 from fastapi import Depends
 from api.users.models import User
@@ -81,20 +81,26 @@ async def generate_report_geojson(
     return res.id
 
 
-@router.get("/{task_id}")
+@router.get("/{task_id}", status_code=200)
 async def get_task_result(task_id: str):
     result = AsyncResult(task_id)
 
     if result.state == "PENDING":
         # Task hasn't been started yet
-        return {"task_id": task_id, "status": "Pending", "result": None}
+        return Response(
+            {"task_id": task_id, "status": "Pending", "result": None},
+            status_code=202,
+        )
     elif result.state == "FAILURE":
         # Task failed
-        return {
-            "task_id": task_id,
-            "status": "Failed",
-            "result": str(result.info),
-        }
+        return Response(
+            {
+                "task_id": task_id,
+                "status": "Failed",
+                "result": str(result.info),
+            },
+            status_code=500,
+        )
     elif result.state == "SUCCESS":
         # Task succeeded
         return {
@@ -104,4 +110,7 @@ async def get_task_result(task_id: str):
         }
     else:
         # Task is still running
-        return {"task_id": task_id, "status": result.state, "result": None}
+        return Response(
+            {"task_id": task_id, "status": result.state, "result": None},
+            status_code=202,
+        )
