@@ -16,6 +16,7 @@ class GlobalConfig(BaseConfig):
     REDIS_URL: Optional[str] = None
     DB_FORCE_ROLL_BACK: bool = False
     ORS_URL: Optional[str] = None
+    SENTRY_DSN: Optional[str] = None
 
 
 class DevConfig(GlobalConfig):
