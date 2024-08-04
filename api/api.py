@@ -19,6 +19,7 @@ from api.users.subscriptions.router import router as users_subscription_router
 
 import sentry_sdk
 from api.config import config
+from api.tasks.celery import celery
 
 sentry_sdk.init(
     dsn=config.SENTRY_DSN,

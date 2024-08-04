@@ -2,6 +2,7 @@ from celery import Celery
 
 from api.config import config
 
+print(config.REDIS_URL)
 celery = Celery(
     "tasks",
     broker=config.REDIS_URL,
