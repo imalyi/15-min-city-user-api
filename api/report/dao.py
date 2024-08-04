@@ -1,26 +1,16 @@
-from api.dao.base import BaseDAO
 from api.database import async_session_maker
 from api.pois.models import POI
-from sqlalchemy import select, func, join
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, func
 from api.category_collections.categories.models import Categories
-from api.category_collections.models import CategoryCollections
 from api.addresses.models import Address
-from geoalchemy2 import WKTElement
 from geoalchemy2.functions import (
-    ST_Contains,
-    ST_DWithin,
-    ST_GeomFromText,
     ST_X,
     ST_Y,
 )
-from shapely.geometry import Point
 from api.report.schemas import ReportCreate
 from sqlalchemy.orm import joinedload
 from geoalchemy2.functions import (
     ST_Distance,
-    ST_GeomFromText,
-    ST_DWithin,
     ST_Centroid,
 )
 

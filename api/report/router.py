@@ -1,16 +1,11 @@
-from fastapi import APIRouter, Response, Request
+from fastapi import APIRouter, Request
 from api.users.user_manager import current_user_optional
 from fastapi import Depends
 from api.users.models import User
 from fastapi import HTTPException
-from api.subscriptions.models import SubscriptionLevel
-from api.users.dao import UserDAO
 from api.report.schemas import ReportCreate
 from api.tasks.tasks import generate_report
-from api.addresses.router import get_address_by_id
 from api.category_collections.categories.router import get_category_by_id
-from api.pois.models import POI
-from sqlalchemy import select
 from api.report.dao import ReportDAO
 from celery.result import AsyncResult
 from fastapi.responses import JSONResponse

@@ -1,4 +1,3 @@
-from api.tasks.celery import celery
 import openrouteservice as ors
 from api.config import config
 
