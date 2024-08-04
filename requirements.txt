@@ -7,6 +7,7 @@ argon2-cffi-bindings==21.2.0
 asttokens==2.4.1
 async-timeout==4.0.3
 asyncpg==0.29.0
+autoflake==2.3.1
 bcrypt==4.1.2
 billiard==4.2.0
 celery==5.4.0
@@ -78,6 +79,7 @@ pydantic==2.8.2
 pydantic-extra-types==2.9.0
 pydantic-settings==2.3.4
 pydantic_core==2.20.1
+pyflakes==3.2.0
 Pygments==2.18.0
 PyJWT==2.8.0
 pymongo==4.8.0
@@ -92,6 +94,7 @@ pyzmq==26.0.3
 redis==5.0.8
 requests==2.32.3
 rich==13.7.1
+sentry-sdk==2.12.0
 shapely==2.0.5
 shellingham==1.5.4
 six==1.16.0
