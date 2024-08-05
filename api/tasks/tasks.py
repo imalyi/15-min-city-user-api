@@ -44,6 +44,7 @@ def generate_geojson(nearest_points_dict):
                         "address": poi["address"],
                         "category": category_title,
                         "collection": collection_title,
+                        "distance": poi["distance"],
                     }
                     features.append(
                         Feature(geometry=point, properties=properties)
