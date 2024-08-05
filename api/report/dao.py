@@ -72,14 +72,16 @@ class ReportDAO:
 
     @classmethod
     async def create_dict(cls, pois, report_request: ReportCreate):
-
         data = {}
         data["start_point"] = {}
-        data["start_point"].update(
+        data["start_point"]["location"] = (
             await ReportDAO.get_centroid_by_address_id(
                 report_request.address_id
             )
         )
+        data["start_point"]["address"] = (
+            await ReportDAO.get_address_by_id(report_request.address_id)
+        ).to_dict()
         data["pois"] = {}
         for poi, lon, lat in pois:
             for category in [category for category in poi.categories]:
@@ -117,6 +119,13 @@ class ReportDAO:
                 "lat": result.center_latitude,
                 "lon": result.center_longitude,
             }
+
+    @classmethod
+    async def get_address_by_id(cls, address_id: int):
+        async with async_session_maker() as session:
+            query = select(Address).where(Address.id == address_id)
+            result = await session.execute(query)
+        return result.scalar()
 
     @classmethod
     async def create_WKE_point(cls, point):

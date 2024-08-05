@@ -23,7 +23,7 @@ def generate_geojson(nearest_points_dict):
 
     # Add start_point as a GeoJSON feature
     if "start_point" in nearest_points_dict:
-        start_point = nearest_points_dict["start_point"]
+        start_point = nearest_points_dict["start_point"]["location"]
         point = Point((start_point["lon"], start_point["lat"]))
         features.append(
             Feature(geometry=point, properties={"name": "Start Point"})
