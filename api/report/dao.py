@@ -1,5 +1,6 @@
 from geoalchemy2.functions import ST_X, ST_Y, ST_Centroid, ST_Distance
-from sqlalchemy import exc, func, select
+from sqlalchemy import exc, func, select, or_, and_
+from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import joinedload, session
 from starlette.routing import request_response
 
@@ -18,11 +19,22 @@ class ReportDAO:
     async def generate_report_create_for_celery(
         cls, report_request: ReportCreate
     ):
-        pois = await cls.get_nearest_pois(report_request)
+        pois = await cls.get_nearest_pois(
+            report_request, cls._build_nearest_pois_query
+        )
+        custom_pois = await cls.get_nearest_pois(
+            report_request, cls._build_custom_pois_query
+        )
+
         start_point_data = await cls.get_start_point_information(
             report_request.address_id
         )
-        return {"start_point": start_point_data, "pois": pois}
+
+        return {
+            "start_point": start_point_data,
+            "pois": pois,
+            "custom_pois": custom_pois,
+        }
 
     @classmethod
     async def get_missing_categories(cls, pois, report_request: ReportCreate):
@@ -60,7 +72,9 @@ class ReportDAO:
         return organized_categories
 
     @classmethod
-    def _build_nearest_pois_query(cls, point, report_request: ReportCreate):
+    async def _build_nearest_pois_query(
+        cls, point, report_request: ReportCreate
+    ):
         query = (
             select(
                 POI,
@@ -76,17 +90,54 @@ class ReportDAO:
             )
             .options(joinedload(POI.address), joinedload(POI.categories))
         )
-
         return query
 
     @classmethod
-    async def get_nearest_pois(cls, report_request: ReportCreate):
+    async def _build_custom_pois_query(
+        cls, point, report_request: ReportCreate
+    ):
+        async with async_session_maker() as session:
+            query = (
+                select(POI)
+                .where(POI.id.in_(report_request.custom_places_ids))
+                .options(joinedload(POI.categories))
+            )
+            result = await session.execute(query)
+            custom_poi_templates = result.scalars().unique().all()
+            poi_names = [poi.name for poi in custom_poi_templates]
+
+            base_query = (
+                select(
+                    POI,
+                    ST_X(ST_Centroid(Address.geometry)).label(
+                        "center_longitude"
+                    ),
+                    ST_Y(ST_Centroid(Address.geometry)).label(
+                        "center_latitude"
+                    ),
+                )
+                .join(Address, POI.address_id == Address.id)
+                .join(POI.categories)
+                .where(
+                    ST_Distance(Address.geometry, point) * 111000
+                    < report_request.distance
+                )
+                .where(POI.name.in_(poi_names))
+                .options(joinedload(POI.address), joinedload(POI.categories))
+            )
+
+        return base_query
+
+    @classmethod
+    async def get_nearest_pois(
+        cls, report_request: ReportCreate, query: callable
+    ):
         async with async_session_maker() as session:
             point_dict = await ReportDAO.get_centroid_by_address_id(
                 report_request.address_id
             )
             point = await ReportDAO.create_WKE_point(point_dict)
-            query = cls._build_nearest_pois_query(point, report_request)
+            query = await query(point, report_request)
             result = await session.execute(query)
 
             pois = result.unique().all()

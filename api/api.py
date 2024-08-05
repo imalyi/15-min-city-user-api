@@ -21,6 +21,12 @@ import sentry_sdk
 from api.config import config
 from api.tasks.celery import celery
 
+
+import logging
+
+logging.disable(logging.WARNING)
+
+
 sentry_sdk.init(
     dsn=config.SENTRY_DSN,
     # Set traces_sample_rate to 1.0 to capture 100%
