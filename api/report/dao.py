@@ -1,15 +1,43 @@
 from geoalchemy2.functions import ST_X, ST_Y, ST_Centroid, ST_Distance
 from sqlalchemy import func, select
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, session
 
 from api.addresses.models import Address
 from api.category_collections.categories.models import Categories
+from api.category_collections.models import CategoryCollections
 from api.database import async_session_maker
 from api.pois.models import POI
 from api.report.schemas import ReportCreate
 
 
 class ReportDAO:
+    @classmethod
+    async def found_empty_categories(cls, pois, report_request: ReportCreate):
+        found_category_ids = {
+            category.id for poi in pois for category in poi.POI.categories
+        }
+        missing_category_ids = (
+            set(report_request.category_ids) - found_category_ids
+        )
+        async with async_session_maker() as session:
+            query = (
+                select(Categories).where(
+                    Categories.id.in_(missing_category_ids)
+                )
+            ).options(joinedload(Categories.collection))
+            result = await session.execute(query)
+            categories = (
+                result.scalars().unique().all()
+            )  # Получаем список категорий
+
+        data = {}
+        for category in categories:
+            if data.get(category.collection.title) is None:
+                data[category.collection.title] = {}
+            if data[category.collection.title].get(category.title) is None:
+                data[category.collection.title][category.title] = []
+        return data
+
     @classmethod
     async def get_nearest_pois(cls, report_request: ReportCreate):
         async with async_session_maker() as session:
@@ -44,6 +72,9 @@ class ReportDAO:
 
     @classmethod
     async def create_dict(cls, pois, report_request: ReportCreate):
+        missing_categories = await ReportDAO.found_empty_categories(
+            pois, report_request
+        )
         data = {}
         data["start_point"] = {}
         data["start_point"].update(
@@ -68,6 +99,10 @@ class ReportDAO:
                         "address": poi.address.to_dict(),
                     }
                 )
+        empty_categories_dict = await ReportDAO.found_empty_categories(
+            pois, report_request
+        )
+        data["pois"].update(empty_categories_dict)
         return data
 
     @classmethod
