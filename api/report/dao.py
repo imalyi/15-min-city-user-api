@@ -1,6 +1,7 @@
 from geoalchemy2.functions import ST_X, ST_Y, ST_Centroid, ST_Distance
-from sqlalchemy import func, select
+from sqlalchemy import exc, func, select
 from sqlalchemy.orm import joinedload, session
+from starlette.routing import request_response
 
 from api.addresses.models import Address
 from api.category_collections.categories.models import Categories
@@ -8,11 +9,23 @@ from api.category_collections.models import CategoryCollections
 from api.database import async_session_maker
 from api.pois.models import POI
 from api.report.schemas import ReportCreate
+from api.pois.dao import POIDAO
 
 
 class ReportDAO:
+
     @classmethod
-    async def found_empty_categories(cls, pois, report_request: ReportCreate):
+    async def generate_report_create_for_celery(
+        cls, report_request: ReportCreate
+    ):
+        pois = await cls.get_nearest_pois(report_request)
+        start_point_data = await cls.get_start_point_information(
+            report_request.address_id
+        )
+        return {"start_point": start_point_data, "pois": pois}
+
+    @classmethod
+    async def get_missing_categories(cls, pois, report_request: ReportCreate):
         found_category_ids = {
             category.id for poi in pois for category in poi.POI.categories
         }
@@ -26,17 +39,45 @@ class ReportDAO:
                 )
             ).options(joinedload(Categories.collection))
             result = await session.execute(query)
-            categories = (
-                result.scalars().unique().all()
-            )  # Получаем список категорий
+            categories = result.scalars().unique().all()
+        return cls._organize_missing_categories(categories)
 
-        data = {}
+    @classmethod
+    def _organize_missing_categories(cls, categories):
+        organized_categories = {}
         for category in categories:
-            if data.get(category.collection.title) is None:
-                data[category.collection.title] = {}
-            if data[category.collection.title].get(category.title) is None:
-                data[category.collection.title][category.title] = []
-        return data
+            if organized_categories.get(category.collection.title) is None:
+                organized_categories[category.collection.title] = {}
+            if (
+                organized_categories[category.collection.title].get(
+                    category.title
+                )
+                is None
+            ):
+                organized_categories[category.collection.title][
+                    category.title
+                ] = []
+        return organized_categories
+
+    @classmethod
+    def _build_nearest_pois_query(cls, point, report_request: ReportCreate):
+        query = (
+            select(
+                POI,
+                ST_X(ST_Centroid(Address.geometry)).label("center_longitude"),
+                ST_Y(ST_Centroid(Address.geometry)).label("center_latitude"),
+            )
+            .join(Address, POI.address_id == Address.id)
+            .join(POI.categories)
+            .where(Categories.id.in_(report_request.category_ids))
+            .where(
+                ST_Distance(Address.geometry, point) * 111000
+                < report_request.distance
+            )
+            .options(joinedload(POI.address), joinedload(POI.categories))
+        )
+
+        return query
 
     @classmethod
     async def get_nearest_pois(cls, report_request: ReportCreate):
@@ -45,65 +86,60 @@ class ReportDAO:
                 report_request.address_id
             )
             point = await ReportDAO.create_WKE_point(point_dict)
-            query = (
-                select(
-                    POI,
-                    ST_X(ST_Centroid(Address.geometry)).label(
-                        "center_longitude"
-                    ),
-                    ST_Y(ST_Centroid(Address.geometry)).label(
-                        "center_latitude"
-                    ),
-                )
-                .join(Address, POI.address_id == Address.id)
-                .join(POI.categories)
-                .where(Categories.id.in_(report_request.category_ids))
-                .where(
-                    ST_Distance(Address.geometry, point) * 111000
-                    < report_request.distance
-                )
-                .options(joinedload(POI.address), joinedload(POI.categories))
-            )
-
+            query = cls._build_nearest_pois_query(point, report_request)
             result = await session.execute(query)
 
             pois = result.unique().all()
-            return pois
+            return await cls._organize_pois(pois, report_request)
 
     @classmethod
-    async def create_dict(cls, pois, report_request: ReportCreate):
-        data = {}
-        data["start_point"] = {}
-        data["start_point"]["location"] = (
-            await ReportDAO.get_centroid_by_address_id(
-                report_request.address_id
-            )
+    async def get_start_point_information(cls, address_id: int):
+        start_point = {}
+        start_point["location"] = await cls.get_centroid_by_address_id(
+            address_id
         )
-        data["start_point"]["address"] = (
-            await ReportDAO.get_address_by_id(report_request.address_id)
+        start_point["address"] = (
+            await ReportDAO.get_address_by_id(address_id)
         ).to_dict()
-        data["pois"] = {}
+        return start_point
+
+    @classmethod
+    async def _organize_pois(cls, pois, report_request: ReportCreate):
+        data = {}
+
         for poi, lon, lat in pois:
             for category in [category for category in poi.categories]:
                 collection_title = category.collection.title
                 category_titile = category.title
-                if not data["pois"].get(collection_title):
-                    data["pois"][collection_title] = {}
-                if not data["pois"][collection_title].get(category_titile):
-                    data["pois"][collection_title][category_titile] = []
+                if not data.get(collection_title):
+                    data[collection_title] = {}
+                if not data[collection_title].get(category_titile):
+                    data[collection_title][category_titile] = []
 
-                data["pois"][collection_title][category_titile].append(
+                data[collection_title][category_titile].append(
                     {
                         "name": poi.name,
                         "location": {"lat": lat, "lon": lon},
                         "address": poi.address.to_dict(),
                     }
                 )
-        empty_categories_dict = await ReportDAO.found_empty_categories(
+        empty_categories_dict = await cls.get_missing_categories(
             pois, report_request
         )
-        data["pois"].update(empty_categories_dict)
+        data = cls._add_empty_categories_to_pois(data, empty_categories_dict)
         return data
+
+    @classmethod
+    def _add_empty_categories_to_pois(
+        cls, pois: dict, empty_categories_dict: dict
+    ):
+        for collection_name, categories in empty_categories_dict.items():
+            for category in categories:
+                if not pois.get(collection_name):
+                    pois[collection_name] = {}
+                if not pois[collection_name].get(category):
+                    pois[collection_name][category] = []
+        return pois
 
     @classmethod
     async def get_centroid_by_address_id(cls, address_id: int):
@@ -133,3 +169,7 @@ class ReportDAO:
             f"POINT({point.get('lon')} {point.get('lat')})",
             4326,
         )
+
+    @classmethod
+    async def get_custom_pois(cls, report_request: ReportCreate):
+        pass

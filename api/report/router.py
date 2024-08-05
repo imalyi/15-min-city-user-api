@@ -68,11 +68,11 @@ async def generate_report_geojson(
     if not is_user_have_permission_for_categories:
         raise HTTPException(403, f"User dont have permission on category")
 
-    nearest_pois = await ReportDAO.get_nearest_pois(report_request)
-    nearest_pois_dict = await ReportDAO.create_dict(
-        nearest_pois, report_request
+    nearest_pois_dict = await ReportDAO.generate_report_create_for_celery(
+        report_request
     )
     res = generate_report.delay(nearest_pois_dict)
+
     return res.id
 
 
