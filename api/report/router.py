@@ -7,7 +7,7 @@ from api.report.dao import ReportDAO
 from api.report.schemas import ReportCreate
 from api.tasks.tasks import generate_report
 from api.users.models import User
-from api.users.user_manager import current_user_optional
+from api.users.user_manager import current_user_optional, current_active_user
 
 router = APIRouter(prefix="/report", tags=["Report"])
 
@@ -21,7 +21,7 @@ class IncorrectCategoryID(Exception):
 
 
 async def check_is_user_have_permissions_for_categories(
-    user: User | None, report_request: ReportCreate
+    user: User, report_request: ReportCreate
 ):
     for category_id in report_request.category_ids:
         category_level = await get_category_by_id(category_id)
@@ -35,7 +35,7 @@ async def check_is_user_have_permissions_for_categories(
 
 
 async def check_is_user_have_permission_for_custom_addresses(
-    user: User | None, report_request: ReportCreate
+    user: User, report_request: ReportCreate
 ):
     if user is None and report_request.custom_address_ids is not None:
         return False
@@ -43,7 +43,7 @@ async def check_is_user_have_permission_for_custom_addresses(
 
 
 async def check_user_permission_on_report(
-    user: User | None, report_request: ReportCreate
+    user: User, report_request: ReportCreate
 ):
     if not await check_is_user_have_permission_for_custom_addresses(
         user, report_request
@@ -55,7 +55,7 @@ async def check_user_permission_on_report(
 @router.post("/", status_code=202, response_model=str)
 async def generate_report_geojson(
     report_request: ReportCreate,
-    user: User | None = Depends(current_user_optional),
+    user: User = Depends(current_active_user),
 ):
     if not await check_user_permission_on_report(user, report_request):
         raise HTTPException(403, "User dont have permission")
