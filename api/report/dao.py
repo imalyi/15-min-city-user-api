@@ -72,9 +72,7 @@ class ReportDAO:
 
     @classmethod
     async def create_dict(cls, pois, report_request: ReportCreate):
-        missing_categories = await ReportDAO.found_empty_categories(
-            pois, report_request
-        )
+
         data = {}
         data["start_point"] = {}
         data["start_point"].update(
