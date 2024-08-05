@@ -58,8 +58,8 @@ def generate_geojson(nearest_points_dict):
 @shared_task
 def generate_report(nearest_pois: dict):
     from_ = [
-        nearest_pois.get("start_point", {}).get("lon"),
-        nearest_pois.get("start_point", {}).get("lat"),
+        nearest_pois.get("start_point", {}).get("location").get("lon"),
+        nearest_pois.get("start_point", {}).get("location").get("lat"),
     ]
     for collection, categories in nearest_pois["pois"].items():
         for category, pois in categories.items():
