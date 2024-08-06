@@ -76,7 +76,9 @@ async def generate_report_geojson(
 
 
 @router.get("/{task_id}", status_code=200)
-async def get_task_result(task_id: str, request: Request):
+async def get_task_result(
+    task_id: str, request: Request, user: User = Depends(current_active_user)
+):
     result = AsyncResult(task_id)
 
     # Определите, какой формат ответа требуется
