@@ -17,6 +17,7 @@ class GlobalConfig(BaseConfig):
     DB_FORCE_ROLL_BACK: bool = False
     ORS_URL: Optional[str] = None
     SENTRY_DSN: Optional[str] = None
+    GOOGLE_MAPS_API_KEY: Optional[str] = None
 
 
 class DevConfig(GlobalConfig):

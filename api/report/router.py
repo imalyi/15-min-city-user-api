@@ -72,7 +72,6 @@ async def generate_report_geojson(
         report_request
     )
     res = generate_report.delay(nearest_pois_dict)
-
     return res.id
 
 

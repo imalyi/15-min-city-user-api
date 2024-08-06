@@ -1,3 +1,4 @@
+from operator import add
 from geoalchemy2.functions import ST_X, ST_Y, ST_Centroid, ST_Distance
 from sqlalchemy import exc, func, select, or_, and_
 from sqlalchemy.ext.asyncio import create_async_engine
@@ -29,11 +30,12 @@ class ReportDAO:
         start_point_data = await cls.get_start_point_information(
             report_request.address_id
         )
-
+        custom_addressess = await cls.get_custom_addresses(report_request)
         return {
             "start_point": start_point_data,
             "pois": pois,
             "custom_pois": custom_pois,
+            "custom_addressess": custom_addressess,
         }
 
     @classmethod
@@ -222,5 +224,17 @@ class ReportDAO:
         )
 
     @classmethod
-    async def get_custom_pois(cls, report_request: ReportCreate):
-        pass
+    async def get_custom_addresses(cls, report_request: ReportCreate):
+        custom_adressess = []
+        addressess = [
+            await ReportDAO.get_address_by_id(address_id)
+            for address_id in report_request.custom_address_ids
+        ]
+        for address in addressess:
+            address_dict = {}
+            address_dict.update(address.to_dict())
+            address_dict["location"] = await cls.get_centroid_by_address_id(
+                address.id
+            )
+            custom_adressess.append(address_dict)
+        return custom_adressess
