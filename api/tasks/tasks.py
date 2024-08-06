@@ -73,7 +73,7 @@ def calc_distance_for_all(from_, nearest_pois: dict, key: str):
                 i += 1
 
 
-# @shared_task
+@shared_task
 def generate_report(nearest_pois: dict):
     from_ = [
         nearest_pois.get("start_point", {}).get("location").get("lon"),
