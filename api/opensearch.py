@@ -29,20 +29,20 @@ def create_index(index_name: str):
         "settings": {
             "analysis": {
                 "analyzer": {
-                    "polish_analyzer": {
+                    "standard_analyzer": {
                         "type": "custom",
                         "tokenizer": "standard",
-                        "filter": ["lowercase", "polish_stemmer"],
+                        "filter": ["lowercase"],
                     }
-                },
-                "filter": {
-                    "polish_stemmer": {"type": "stemmer", "name": "polish"}
-                },
+                }
             }
         },
         "mappings": {
             "properties": {
-                "full_address": {"type": "text", "analyzer": "polish_analyzer"}
+                "full_address": {
+                    "type": "text",
+                    "analyzer": "standard_analyzer",
+                }
             }
         },
     }
