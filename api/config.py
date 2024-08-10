@@ -13,6 +13,10 @@ class BaseConfig(BaseSettings):
 
 class GlobalConfig(BaseConfig):
     DATABASE_URL: Optional[str] = None
+    OPEN_SEARCH_HOST: Optional[str] = None
+    OPEN_SEARCH_PORT: Optional[str] = None
+    OPEN_SEARCH_LOGIN: Optional[str] = None
+    OPEN_SEARCH_PASSWORD: Optional[str] = None
     REDIS_URL: Optional[str] = None
     DB_FORCE_ROLL_BACK: bool = False
     ORS_URL: Optional[str] = None

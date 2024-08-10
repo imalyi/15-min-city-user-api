@@ -2,10 +2,12 @@ from opensearchpy import OpenSearch
 from opensearchpy.helpers import bulk
 from api.config import config
 from sqlalchemy import create_engine, text
+from api.config import config
 
-host = "localhost"
-port = 9200
-auth = ("admin", "admin")
+host = config.OPEN_SEARCH_HOST
+port = config.OPEN_SEARCH_PORT
+auth = (config.OPEN_SEARCH_LOGIN, config.OPEN_SEARCH_PASSWORD)
+
 index_name = "addresses"
 
 
