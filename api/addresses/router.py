@@ -11,7 +11,7 @@ from api.addresses.schemas import AddressFilter
 from fastapi_filter import FilterDepends
 from typing import Union
 import json
-
+from api.opensearch import find_address_by_partial_name
 
 router = APIRouter(prefix="/addresses", tags=["Addresses"])
 
@@ -51,6 +51,8 @@ async def get_all_addresses(
 ):
     if filters.lon and filters.lat:
         return await AddressDAO.find_by_point(filters)
+    if filters.full_address__ilike:
+        return find_address_by_partial_name(filters.full_address__ilike)
     return await AddressDAO.find_all(filters)
 
 

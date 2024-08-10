@@ -19,12 +19,15 @@ from api.users.subscriptions.router import router as users_subscription_router
 
 import sentry_sdk
 from api.config import config
-from api.tasks.celery import celery
-
 
 import logging
 
-logging.disable(logging.WARNING)
+
+# DO NOT DELETE!
+from api.tasks.celery import celery
+import api.opensearch
+
+# logging.disable(logging.WARNING)
 
 
 sentry_sdk.init(
