@@ -8,6 +8,8 @@ from api.report.schemas import ReportCreate
 from api.tasks.tasks import generate_report
 from api.users.models import User
 from api.users.user_manager import current_user_optional, current_active_user
+from api.users.history.router import create_history_record
+
 
 router = APIRouter(prefix="/report", tags=["Report"])
 
@@ -71,6 +73,8 @@ async def generate_report_geojson(
     nearest_pois_dict = await ReportDAO.generate_report_create_for_celery(
         report_request
     )
+
+    await create_history_record(user, nearest_pois_dict)
     res = generate_report.delay(nearest_pois_dict)
     return res.id
 
