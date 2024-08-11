@@ -14,6 +14,7 @@ from api.users.router import (
     auth_user_router,
     register_user_router,
     user_router,
+    verify_user_router,
 )
 from api.users.subscriptions.router import router as users_subscription_router
 
@@ -70,4 +71,5 @@ app.include_router(
 app.include_router(subscription_router)
 app.include_router(invite_codes_router)
 app.include_router(users_subscription_router, prefix="/users")
+app.include_router(verify_user_router, prefix="/users")
 app.include_router(report_router)

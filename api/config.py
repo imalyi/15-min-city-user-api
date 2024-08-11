@@ -22,6 +22,7 @@ class GlobalConfig(BaseConfig):
     ORS_URL: Optional[str] = None
     SENTRY_DSN: Optional[str] = None
     GOOGLE_MAPS_API_KEY: Optional[str] = None
+    MAILGUN_API_KEY: Optional[str] = None
 
 
 class DevConfig(GlobalConfig):

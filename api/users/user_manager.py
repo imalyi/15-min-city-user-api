@@ -2,6 +2,7 @@ from typing import Optional
 
 from fastapi import Depends, Request
 from fastapi_users import BaseUserManager, IntegerIDMixin
+from sqlalchemy.sql.functions import user
 
 from api.users.models import User, get_user_db
 from fastapi_users import FastAPIUsers
@@ -11,6 +12,30 @@ from fastapi_users.authentication import (
     BearerTransport,
     JWTStrategy,
 )
+import requests
+from api.config import config
+
+
+def send_simple_message(user_email: str, subject: str, text: str):
+    print(config.MAILGUN_API_KEY)
+    response = requests.post(
+        "https://api.eu.mailgun.net/v3/cityinminutes.me/messages",
+        auth=("api", config.MAILGUN_API_KEY),
+        data={
+            "from": "Monika z CityInMinutes.me <mailgun@cityinminutes.me>",
+            "to": [user_email],
+            "subject": subject,
+            "text": text,
+        },
+    )
+
+
+def send_confifmation_email(user_email: str, token: str):
+    send_simple_message(
+        user_email,
+        "Confirm Your email",
+        f"https://cityinminutes.me/verify?token={token}",
+    )
 
 
 SECRET = "SECRET"
@@ -32,7 +57,7 @@ auth_backend = AuthenticationBackend(
     get_strategy=get_jwt_strategy,
 )
 fastapi_users = FastAPIUsers[User, int](get_user_manager, [auth_backend])
-current_active_user = fastapi_users.current_user(active=True)
+current_active_user = fastapi_users.current_user(active=True, verified=True)
 current_admin_user = fastapi_users.current_user(superuser=True)
 current_user_optional = fastapi_users.current_user(optional=True)
 
@@ -56,6 +81,4 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
     async def on_after_request_verify(
         self, user: User, token: str, request: Optional[Request] = None
     ):
-        print(
-            f"Verification requested for user {user.id}. Verification token: {token}"
-        )
+        send_confifmation_email(user.email, token)
