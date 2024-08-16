@@ -24,7 +24,7 @@ class POI(Base):
     modified_at: Mapped[datetime] = mapped_column(
         server_onupdate=func.now(), nullable=True
     )
-    data: Mapped[dict] = mapped_column(JSONB, nullable=True)
+
     address_id: Mapped[int] = mapped_column(
         ForeignKey("addresses.id", ondelete="CASCADE"), nullable=False
     )

@@ -6,7 +6,9 @@ from sqlalchemy import UniqueConstraint, ForeignKey
 class InviteCode(Base):
     __tablename__ = "invite_codes"
     id: Mapped[required_int] = mapped_column(primary_key=True)
-    level: Mapped[required_int]
+    level: Mapped[required_int] = mapped_column(
+        ForeignKey("subscription_levels.level")
+    )
     days: Mapped[required_int]
     code: Mapped[required_string]
     description: Mapped[required_string]

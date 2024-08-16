@@ -1,4 +1,5 @@
 from sqlalchemy import insert, literal_column, select
+from sqlalchemy.orm import query
 
 from api.database import async_session_maker
 
@@ -17,11 +18,16 @@ class BaseDAO:
             return result.scalars().unique().all()
 
     @classmethod
-    async def find_one_or_none(cls, **filter_by):
+    async def find_one_or_none(cls, order_by=None, **filter_by):
         async with async_session_maker() as session:
             query = select(cls.model).filter_by(**filter_by)
+
+            # Check if order_by is not None before applying it to the query
+            if order_by is not None:
+                query = query.order_by(order_by)
+
             result = await session.execute(query)
-            return result.scalar_one_or_none()
+            return result.scalar() or None
 
     @classmethod
     async def find_by_id(cls, model_id: int):

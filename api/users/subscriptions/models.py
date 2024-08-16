@@ -1,7 +1,7 @@
 from api.database import Base
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import ForeignKey, UniqueConstraint
-from datetime import date
+from datetime import date, datetime
 
 
 class UserSubscription(Base):
@@ -17,3 +17,9 @@ class UserSubscription(Base):
     date_to: Mapped[date]
 
     __table_args__ = (UniqueConstraint("user_id", "date_to", "date_from"),)
+
+    @property
+    def is_active(self):
+        if self.date_to >= date.today():
+            return True
+        return False

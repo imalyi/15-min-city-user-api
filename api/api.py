@@ -68,8 +68,12 @@ app.include_router(
 )
 
 
-app.include_router(subscription_router)
+app.include_router(subscription_router, tags=["user subscription"])
 app.include_router(invite_codes_router)
-app.include_router(users_subscription_router, prefix="/users")
+app.include_router(
+    users_subscription_router,
+    prefix="/users",
+    tags=["user subscription managment"],
+)
 app.include_router(verify_user_router, prefix="/users")
 app.include_router(report_router)

@@ -5,7 +5,6 @@ from api.users.models import User
 from fastapi import Depends
 from typing import List
 from api.pois.categories.router import router as categories_router
-from api.pois.reviews.router import router as reviews_router
 from api.pois.schemas import POI, POICreate, POI, POIFilter
 import json
 from fastapi_filter import FilterDepends
@@ -13,7 +12,6 @@ from fastapi_filter import FilterDepends
 
 router = APIRouter(prefix="/pois", tags=["Points of interest"])
 router.include_router(categories_router)
-router.include_router(reviews_router)
 
 
 @router.get("/", status_code=200, response_model=List[POI])
