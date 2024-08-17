@@ -38,6 +38,5 @@ class Base(DeclarativeBase):
 metadata = sqlalchemy.MetaData()
 
 engine = create_async_engine(
-    config.DATABASE_URL,
-    pool_size=15000,
+    config.DATABASE_URL, pool_size=15000, max_overflow=5000
 )
