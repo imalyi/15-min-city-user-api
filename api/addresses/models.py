@@ -36,11 +36,7 @@ class Address(Base):
     )
 
     __table_args__ = (
-        UniqueConstraint(
-            "street_name",
-            "house_number",
-            "city",
-        ),
+        UniqueConstraint("street_name", "house_number", "city", "geometry"),
     )
 
     def to_dict(self):

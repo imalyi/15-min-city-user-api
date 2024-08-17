@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from api.category_collections.schemas import (
     CategoryCollectionCreate,
     CategoryCollection,
+    CategoryCollectionUpdate,
 )
 from api.category_collections.dao import CategoryCollectionsDAO
 from typing import List
@@ -14,13 +15,41 @@ from api.users.models import User
 from fastapi import Depends
 from fastapi_filter import FilterDepends
 from api.category_collections.schemas import CategoryCollectionFilter
-from api.exceptions.unique import DBException
-from api.category_collections.categories.dao import CategoryDAO
-from api.category_collections.categories.schemas import CategoryCreate
+
+from api.exceptions import DuplicateEntryException
 
 router = APIRouter(
     prefix="/category-collections", tags=["Category Collections"]
 )
+
+
+@router.patch("/{collection_id}", response_model=CategoryCollection)
+async def update_category_collection(
+    collection_id: int,
+    category_update: CategoryCollectionUpdate,
+    user: User = Depends(current_admin_user),
+):
+
+    existing_collection = await CategoryCollectionsDAO.find_by_id(
+        collection_id
+    )
+    if not existing_collection:
+        raise HTTPException(
+            status_code=404,
+            detail="Category collection not found",
+        )
+
+    update_data = category_update.dict(exclude_unset=True)
+    if update_data:
+        updated_collection = await CategoryCollectionsDAO.update_data(
+            collection_id, update_data
+        )
+        return updated_collection
+    else:
+        raise HTTPException(
+            status_code=400,
+            detail="No valid fields to update",
+        )
 
 
 @router.get("/", status_code=200, response_model=List[CategoryCollection])
@@ -51,8 +80,8 @@ async def create_category_collection(
         return await CategoryCollectionsDAO.insert_data(
             new_category_collection.model_dump()
         )
-    except DBException:
-        raise HTTPException(409, "Category collection exists")
+    except DuplicateEntryException:
+        raise HTTPException(409, "Category collectiom exists")
 
 
 # @router.post("/{collection_id}/categories")

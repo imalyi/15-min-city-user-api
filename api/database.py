@@ -39,5 +39,5 @@ metadata = sqlalchemy.MetaData()
 
 engine = create_async_engine(
     config.DATABASE_URL,
-    # pool_size=15,
+    pool_size=15000,
 )

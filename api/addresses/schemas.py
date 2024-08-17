@@ -1,3 +1,4 @@
+import datetime
 from pydantic import ConfigDict, Field, field_validator
 import re
 
@@ -41,12 +42,22 @@ class AddressCreate(CommonAddressAttributes):
     geometry: MultiPolygon
 
 
-# TODO custom alias name generator
+class AddressUpdate(GlobalModelWithJSONAlias):
+    street_name: Optional[str] = Field(
+        min_length=3, max_length=150, default=None
+    )
+    house_number: Optional[str] = Field(
+        min_length=1, max_length=150, default=None
+    )
+    city: Optional[str] = Field(min_length=3, max_length=150, default=None)
+    postcode: Optional[str] = None
+    modified_at: Optional[datetime.datetime] = None
+
+
 class AddressFilter(Filter, GlobalModelWithJSONAlias):
     lat: Optional[float] = None
     lon: Optional[float] = None
     street_name: Optional[str] = None
-    street_type: Optional[str] = None
     house_number: Optional[str] = None
     city: Optional[str] = None
     postcode: Optional[str] = None

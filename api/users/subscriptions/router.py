@@ -40,6 +40,7 @@ async def activate_code(code: str, user: User = Depends(current_active_user)):
             "date_to": date.today() + timedelta(days=new_subscription.days),
         }
     )
+    # TODO mark code is used
 
 
 @router.get("/", response_model=Union[UserSubcription, None])

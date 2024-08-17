@@ -1,7 +1,7 @@
-from sqlalchemy import insert, literal_column, select
+from sqlalchemy import literal_column, select, insert, update
 from sqlalchemy.orm import query
-
 from api.database import async_session_maker
+from api.exceptions import DuplicateEntryException
 
 
 class BaseDAO:
@@ -39,6 +39,8 @@ class BaseDAO:
     @classmethod
     async def insert_data(cls, data: dict):
         async with async_session_maker() as session:
+            if await cls.find_one_or_none(order_by=None, **data):
+                raise DuplicateEntryException("Row exist in db")
             async with session.begin():
                 stmt = (
                     insert(cls.model)
@@ -49,3 +51,18 @@ class BaseDAO:
                 result = await session.execute(stmt)
                 await session.commit()
                 return result.fetchone()
+
+    @classmethod
+    async def update_data(cls, collection_id: int, update_data: dict):
+        async with async_session_maker() as session:
+            async with session.begin():
+                stmt = (
+                    update(cls.model)
+                    .where(cls.model.id == collection_id)
+                    .values(**update_data)
+                    .returning(literal_column("*"))
+                )
+                result = await session.execute(stmt)
+                await session.commit()
+                row = result.fetchone()
+                return row

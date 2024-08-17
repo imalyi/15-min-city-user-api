@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File
+from fastapi import APIRouter, HTTPException, UploadFile, File
 from typing import List
 from geoalchemy2 import WKTElement
 from api.addresses.dao import AddressDAO
@@ -7,11 +7,13 @@ from api.addresses.schemas import AddressCreate
 from api.users.user_manager import current_active_user, current_admin_user
 from api.users.models import User
 from fastapi import Depends
-from api.addresses.schemas import AddressFilter
+from api.addresses.schemas import AddressFilter, AddressUpdate
 from fastapi_filter import FilterDepends
 from typing import Union
 import json
 from api.opensearch import find_address_by_partial_name
+from api.exceptions import DuplicateEntryException
+
 
 router = APIRouter(prefix="/addresses", tags=["Addresses"])
 
@@ -22,7 +24,10 @@ async def create_address(
 ):
     data = new_address.model_dump()
     data["geometry"] = WKTElement(new_address.geometry.wkt, srid=4326)
-    return await AddressDAO.insert_data(data)
+    try:
+        return await AddressDAO.insert_data(data)
+    except DuplicateEntryException as e:
+        raise HTTPException(409, str(e))
 
 
 @router.post("/from_file", status_code=201, response_model=int)
@@ -61,3 +66,30 @@ async def get_address_by_id(
     address_id: int, user: User = Depends(current_admin_user)
 ):
     return await AddressDAO.find_by_id(address_id)
+
+
+@router.patch("/{address_id}", response_model=Address)
+async def update_category_collection(
+    address_id: int,
+    address_update: AddressUpdate,
+    user: User = Depends(current_admin_user),
+):
+
+    existing_address = await AddressDAO.find_by_id(address_id)
+    if not existing_address:
+        raise HTTPException(
+            status_code=404,
+            detail="Category collection not found",
+        )
+
+    update_data = address_update.model_dump(exclude_unset=True)
+    if update_data:
+        updated_collection = await AddressDAO.update_data(
+            address_id, update_data
+        )
+        return updated_collection
+    else:
+        raise HTTPException(
+            status_code=400,
+            detail="No valid fields to update",
+        )

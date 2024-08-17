@@ -1,4 +1,5 @@
-from fastapi import APIRouter, File, UploadFile
+from fastapi import APIRouter, File, HTTPException, UploadFile
+from sqlalchemy.orm import exc
 from api.pois.dao import POIDAO
 from api.users.user_manager import current_active_user, current_admin_user
 from api.users.models import User
@@ -8,7 +9,7 @@ from api.pois.categories.router import router as categories_router
 from api.pois.schemas import POI, POICreate, POI, POIFilter
 import json
 from fastapi_filter import FilterDepends
-
+from api.exceptions import DuplicateEntryException
 
 router = APIRouter(prefix="/pois", tags=["Points of interest"])
 router.include_router(categories_router)
@@ -22,11 +23,14 @@ async def get_all_pois(
     return await POIDAO.find_all(objects_filter=filters)
 
 
-@router.post("/", status_code=201, response_model=POI)
+@router.post("/", status_code=201, response_model=None)
 async def create_pois(
     poi_data: POICreate, user: User = Depends(current_admin_user)
 ):
-    return await POIDAO.insert_data(poi_data.model_dump())
+    try:
+        await POIDAO.insert_data(poi_data.model_dump())
+    except DuplicateEntryException as err:
+        raise HTTPException(409, str(err))
 
 
 @router.get("/{poi_id}", status_code=200, response_model=POI)

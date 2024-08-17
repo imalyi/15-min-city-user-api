@@ -38,3 +38,8 @@ class CategoryCollectionFilter(Filter):
 
     class Constants(Filter.Constants):
         model = CategoryCollectionModel
+
+
+class CategoryCollectionUpdate(GlobalModelWithJSONAlias):
+    title: Optional[str] = None
+    description: Optional[str] = None
