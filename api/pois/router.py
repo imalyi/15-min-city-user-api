@@ -1,3 +1,4 @@
+from collections import namedtuple
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from sqlalchemy.orm import exc
 from api.pois.dao import POIDAO
@@ -10,6 +11,10 @@ from api.pois.schemas import POI, POICreate, POI, POIFilter
 import json
 from fastapi_filter import FilterDepends
 from api.exceptions import DuplicateEntryException
+from api.pois.mevo_stops import MevoStops
+from api.addresses.dao import AddressDAO
+from api.pois.stops import Stops
+
 
 router = APIRouter(prefix="/pois", tags=["Points of interest"])
 router.include_router(categories_router)
@@ -53,3 +58,26 @@ async def create_pois_from_file(
         except Exception as err:
             print(err)
     return len(content) - i
+
+
+@router.post("/update_mevo_stops/{city}", status_code=200)
+async def update_mevo_stops(
+    city: str, user: User = Depends(current_admin_user)
+):
+    mevo_stops = MevoStops(city)
+    for stop in mevo_stops:
+        point = namedtuple("Point", ["lat", "lon"])
+        point.lat = stop.lat
+        point.lon = stop.lon
+        stop_address = await AddressDAO.find_by_point(point)
+        stop_model = POICreate(name=stop.name, address_id=stop_address[0].id)
+        await create_pois(stop_model, user)
+
+
+@router.post("/update_stops/{stop_type}/{city}")
+async def update_stops(
+    stop_type: str, city: str, user: User = Depends(current_admin_user)
+):
+    stops = Stops(city=city, stop_type=stop_type)
+    for stop in stops:
+        print(stop)

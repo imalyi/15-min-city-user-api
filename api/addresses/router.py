@@ -1,6 +1,9 @@
+import datetime
+from operator import add
 from fastapi import APIRouter, HTTPException, UploadFile, File
 from typing import List
 from geoalchemy2 import WKTElement
+from pyrosm import get_data
 from api.addresses.dao import AddressDAO
 from api.addresses.schemas import Address
 from api.addresses.schemas import AddressCreate
@@ -13,7 +16,12 @@ from typing import Union
 import json
 from api.opensearch import find_address_by_partial_name
 from api.exceptions import DuplicateEntryException
-
+from api.addresses.osm_residential_buildings import (
+    OSMResidentialBuildings,
+    Report,
+)
+from pyrosm import OSM, get_data
+from pydantic import ValidationError
 
 router = APIRouter(prefix="/addresses", tags=["Addresses"])
 
@@ -22,12 +30,21 @@ router = APIRouter(prefix="/addresses", tags=["Addresses"])
 async def create_address(
     new_address: AddressCreate, user: User = Depends(current_admin_user)
 ):
+    "Creates address if not exists or update mofified_at time"
     data = new_address.model_dump()
     data["geometry"] = WKTElement(new_address.geometry.wkt, srid=4326)
     try:
         return await AddressDAO.insert_data(data)
     except DuplicateEntryException as e:
-        raise HTTPException(409, str(e))
+        existing_address = await AddressDAO.find_one_or_none(
+            order_by=None,
+            city=data["city"],
+            street_name=data["street_name"],
+            house_number=data["house_number"],
+        )
+        await AddressDAO.update_data(
+            existing_address.id, modified_at=datetime.datetime.now()
+        )
 
 
 @router.post("/from_file", status_code=201, response_model=int)
@@ -93,3 +110,23 @@ async def update_category_collection(
             status_code=400,
             detail="No valid fields to update",
         )
+
+
+@router.post("/{city}")
+async def update_all_addressess(
+    city: str, user: User = Depends(current_admin_user)
+):
+    report = Report()
+    addresses = OSMResidentialBuildings(osm=OSM(get_data(city)), report=report)
+
+    for address in addresses:
+        try:
+            address_model = AddressCreate.model_validate(address.to_dict())
+            await create_address(address_model, user)
+        except HTTPException:
+            report.mark_address_exists(address)
+            continue
+        except ValidationError:
+            report.mark_address_as_bad(address)
+            continue
+    return report.stats

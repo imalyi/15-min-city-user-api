@@ -15,13 +15,6 @@ class CommonAddressAttributes(GlobalModelWithJSONAlias):
     city: str = Field(min_length=3, max_length=150)
     postcode: Optional[str] = None
 
-    @field_validator("city")
-    def city_validator(cls, v):
-        pattern = re.compile(r"^[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż ]+$")
-        if bool(pattern.match(v)):
-            return v
-        raise ValueError("City can contain only polish letters, and '.'")
-
     @field_validator("postcode")
     def validate_postcode(cls, v):
         if not v:

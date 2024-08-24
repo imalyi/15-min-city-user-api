@@ -53,12 +53,12 @@ class BaseDAO:
                 return result.fetchone()
 
     @classmethod
-    async def update_data(cls, collection_id: int, update_data: dict):
+    async def update_data(cls, model_id: int, **update_data):
         async with async_session_maker() as session:
             async with session.begin():
                 stmt = (
                     update(cls.model)
-                    .where(cls.model.id == collection_id)
+                    .where(cls.model.id == model_id)
                     .values(**update_data)
                     .returning(literal_column("*"))
                 )

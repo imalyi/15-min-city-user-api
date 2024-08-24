@@ -17,7 +17,6 @@ from api.config import config
 
 
 def send_simple_message(user_email: str, subject: str, text: str):
-    print(config.MAILGUN_API_KEY)
     response = requests.post(
         "https://api.eu.mailgun.net/v3/cityinminutes.me/messages",
         auth=("api", config.MAILGUN_API_KEY),
@@ -57,7 +56,7 @@ auth_backend = AuthenticationBackend(
     get_strategy=get_jwt_strategy,
 )
 fastapi_users = FastAPIUsers[User, int](get_user_manager, [auth_backend])
-current_active_user = fastapi_users.current_user(active=True, verified=True)
+current_active_user = fastapi_users.current_user(active=True, verified=False)
 current_admin_user = fastapi_users.current_user(superuser=True)
 current_user_optional = fastapi_users.current_user(optional=True)
 
