@@ -73,8 +73,11 @@ async def generate_report_geojson(
     nearest_pois_dict = await ReportDAO.generate_report_create_for_celery(
         report_request
     )
-
-    await create_history_record(user, nearest_pois_dict)
+    try:
+        await create_history_record(user, nearest_pois_dict)
+    except HTTPException:
+        pass
+    
     res = generate_report.delay(nearest_pois_dict)
     return res.id
 
