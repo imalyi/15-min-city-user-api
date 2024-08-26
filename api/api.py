@@ -22,7 +22,7 @@ import sentry_sdk
 from api.config import config
 
 import logging
-
+from api.data_loaders.router import router as data_loader_router
 
 # DO NOT DELETE!
 from api.tasks.celery import celery
@@ -57,6 +57,7 @@ app.include_router(categories_router)
 app.include_router(category_collections_router)
 app.include_router(addresses_router)
 app.include_router(pois_router)
+app.include_router(data_loader_router)
 app.include_router(user_router, prefix="/users", tags=["Users"])
 app.include_router(
     register_user_router, prefix="/users", tags=["Register user"]

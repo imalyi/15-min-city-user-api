@@ -16,12 +16,6 @@ from typing import Union
 import json
 from api.opensearch import find_address_by_partial_name
 from api.exceptions import DuplicateEntryException
-from api.addresses.osm_residential_buildings import (
-    OSMResidentialBuildings,
-    Report,
-)
-from pyrosm import OSM, get_data
-from pydantic import ValidationError
 
 router = APIRouter(prefix="/addresses", tags=["Addresses"])
 
@@ -110,23 +104,3 @@ async def update_category_collection(
             status_code=400,
             detail="No valid fields to update",
         )
-
-
-@router.post("/{city}")
-async def update_all_addressess(
-    city: str, user: User = Depends(current_admin_user)
-):
-    report = Report()
-    addresses = OSMResidentialBuildings(osm=OSM(get_data(city)), report=report)
-
-    for address in addresses:
-        try:
-            address_model = AddressCreate.model_validate(address.to_dict())
-            await create_address(address_model, user)
-        except HTTPException:
-            report.mark_address_exists(address)
-            continue
-        except ValidationError:
-            report.mark_address_as_bad(address)
-            continue
-    return report.stats

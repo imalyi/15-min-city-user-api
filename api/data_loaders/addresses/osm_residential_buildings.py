@@ -1,8 +1,5 @@
 import logging
-import json
 from pyrosm import OSM, get_data
-
-import json
 
 
 class AddressDTO:
@@ -171,9 +168,10 @@ class Geometry:
 
 
 class OSMResidentialBuildings:
-    def __init__(self, *, osm, report: Report):
+    def __init__(self, *, city, report: Report):
+        self.osm = OSM(get_data("gdansk"))
+        self.city = city
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.osm = osm
         self.report = report
         self._data = self.get_buildings()
         self.buildings_iterator = iter(self._data)
@@ -219,9 +217,11 @@ class OSMResidentialBuildings:
         buildings = self.osm.get_buildings()
         buildings_set = set()
         building_count = 0
-        for index, building in buildings.iterrows():
+        for _, building in buildings.iterrows():
             try:
                 address_dto = self._create_address_dto(building)
+                if address_dto.city.lower() != self.city.lower():
+                    continue
                 buildings_set.add(address_dto)
                 building_count += 1
                 self.report.mark_address_ok(address_dto)
