@@ -157,4 +157,4 @@ def load_data():
     insert_data(address_data, index_name)
 
 
-# load_data()
+load_data()
