@@ -26,7 +26,7 @@ class Address(Base):
     full_address: Mapped[str] = mapped_column(
         String,
         Computed(
-            "COALESCE(street_name || ' ' || house_number || ', ' || city || COALESCE(', ' || postcode, '')"
+            "COALESCE(street_name || ' ' || house_number || ', ' || city || COALESCE(', ' || postcode, ''))"
         ),
     )
     pois: Mapped["POI"] = relationship(back_populates="address", lazy="joined")

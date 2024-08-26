@@ -14,26 +14,14 @@ from fastapi_users.authentication import (
 )
 import requests
 from api.config import config
-
-
-def send_simple_message(user_email: str, subject: str, text: str):
-    response = requests.post(
-        "https://api.eu.mailgun.net/v3/cityinminutes.me/messages",
-        auth=("api", config.MAILGUN_API_KEY),
-        data={
-            "from": "Monika z CityInMinutes.me <mailgun@cityinminutes.me>",
-            "to": [user_email],
-            "subject": subject,
-            "text": text,
-        },
-    )
+from api.services.send_email import send_simple_message
 
 
 def send_confifmation_email(user_email: str, token: str):
     send_simple_message(
-        user_email,
-        "Confirm Your email",
-        f"https://cityinminutes.me/verify?token={token}",
+        user_email=user_email,
+        subject="Confirm Your email",
+        text=f"https://cityinminutes.me/verify?token={token}",
     )
 
 
