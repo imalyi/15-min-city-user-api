@@ -23,4 +23,20 @@ class CategoryCollectionsDAO(BaseDAO):
             )
 
             result = await session.execute(query)
-            return result.scalars().all()
+            category_collections = result.scalars().all()
+
+            # Sort CategoryCollections by their order field
+            category_collections.sort(key=lambda collection: collection.order)
+
+            # Sort Categories within each CategoryCollection by their order field
+            for collection in category_collections:
+                collection.categories = sorted(
+                    (
+                        category
+                        for category in collection.categories
+                        if category.is_hidden == is_hidden
+                    ),
+                    key=lambda category: category.order,
+                )
+
+            return category_collections

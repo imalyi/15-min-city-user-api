@@ -220,7 +220,11 @@ class OSMResidentialBuildings:
         for _, building in buildings.iterrows():
             try:
                 address_dto = self._create_address_dto(building)
-                if address_dto.city.lower() != self.city.lower():
+                if address_dto.city.lower() not in [
+                    "sopot",
+                    "gdańsk",
+                    "gdynia",
+                ]:
                     continue
                 buildings_set.add(address_dto)
                 building_count += 1
