@@ -41,32 +41,25 @@ async def create_address(
         )
 
 
-@router.post("/from_file", status_code=201, response_model=int)
-async def create_addresses_from_file(
-    file: UploadFile = File(...), user: User = Depends(current_admin_user)
-):
-    content = await file.read()
-    content = json.loads(content)
-    i = 0
-    for address in content:
-        try:
-            address = AddressCreate.model_validate(address)
-            result = await create_address(address, user)
-            i += 1
-        except Exception as err:
-            print(err, address)
-    return len(content) - i
-
-
 @router.get(
-    "/", status_code=200, response_model=Union[List[Address], Address, None]
+    "/",
+    status_code=200,
+    response_model=Union[
+        List[Address],
+        Address,
+        None,
+    ],
 )
 async def get_all_addresses(
     filters: AddressFilter = FilterDepends(AddressFilter),
     user: User = Depends(current_active_user),
 ):
     if filters.lon and filters.lat:
-        return await AddressDAO.find_by_point(filters)
+        address, distance = await AddressDAO.find_by_point(filters)
+        print(distance)
+        if distance > 100:
+            raise HTTPException(404, "Address not found in radius 500m")
+        return address
     if filters.full_address__ilike:
         return find_address_by_partial_name(filters.full_address__ilike)
     return await AddressDAO.find_all(filters)

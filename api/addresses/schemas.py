@@ -25,6 +25,10 @@ class CommonAddressAttributes(GlobalModelWithJSONAlias):
         raise ValueError("Incorrect postcode format")
 
 
+class NearestAddress(CommonAddressAttributes):
+    distance: float
+
+
 class Address(CommonAddressAttributes):
     id_: int = Field(alias="id")
     full_address: str
