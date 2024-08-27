@@ -12,6 +12,7 @@ from api.database import async_session_maker
 from api.pois.models import POI
 from api.report.schemas import ReportCreate
 from api.pois.dao import POIDAO
+from api.exceptions import NotFoundException
 
 
 class ReportDAO:
@@ -204,6 +205,8 @@ class ReportDAO:
             ).where(Address.id == address_id)
             result = await session.execute(query)
             result = result.first()
+            if not result:
+                raise NotFoundException("Address not found")
             return {
                 "lat": result.center_latitude,
                 "lon": result.center_longitude,

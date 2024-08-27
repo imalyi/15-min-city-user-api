@@ -9,7 +9,7 @@ from api.tasks.tasks import generate_report
 from api.users.models import User
 from api.users.user_manager import current_user_optional, current_active_user
 from api.users.history.router import create_history_record
-from api.exceptions import DuplicateEntryException
+from api.exceptions import DuplicateEntryException, NotFoundException
 
 router = APIRouter(prefix="/report", tags=["Report"])
 
@@ -27,6 +27,8 @@ async def check_is_user_have_permissions_for_categories(
 ):
     for category_id in report_request.category_ids:
         category_level = await get_category_by_id(category_id)
+        if not category_level:
+            raise NotFoundException
         try:
             category_level = category_level.minimum_subscription_level
         except AttributeError:
@@ -61,18 +63,22 @@ async def generate_report_geojson(
 ):
     if not await check_user_permission_on_report(user, report_request):
         raise HTTPException(403, "User dont have permission")
-
-    is_user_have_permission_for_categories = (
-        await check_is_user_have_permissions_for_categories(
-            user, report_request
+    try:
+        is_user_have_permission_for_categories = (
+            await check_is_user_have_permissions_for_categories(
+                user, report_request
+            )
         )
-    )
+    except NotFoundException:
+        raise HTTPException(404, "Some categories not found")
     if not is_user_have_permission_for_categories:
-        raise HTTPException(403, f"User dont have permission on category")
-
-    nearest_pois_dict = await ReportDAO.generate_report_create_for_celery(
-        report_request
-    )
+        raise HTTPException(403, "User dont have permission on category")
+    try:
+        nearest_pois_dict = await ReportDAO.generate_report_create_for_celery(
+            report_request
+        )
+    except NotFoundException:
+        raise HTTPException(404, "Adress or category not found")
     try:
         await create_history_record(user, nearest_pois_dict)
     except DuplicateEntryException:
