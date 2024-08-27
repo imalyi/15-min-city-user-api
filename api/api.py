@@ -15,6 +15,7 @@ from api.users.router import (
     register_user_router,
     user_router,
     verify_user_router,
+    reset_user_password_router,
 )
 from api.users.subscriptions.router import router as users_subscription_router
 from api.contact.router import router as ticket_router
@@ -35,12 +36,7 @@ import api.opensearch
 
 sentry_sdk.init(
     dsn=config.SENTRY_DSN,
-    # Set traces_sample_rate to 1.0 to capture 100%
-    # of transactions for performance monitoring.
     traces_sample_rate=1.0,
-    # Set profiles_sample_rate to 1.0 to profile 100%
-    # of sampled transactions.
-    # We recommend adjusting this value in production.
     profiles_sample_rate=1.0,
 )
 
@@ -70,6 +66,8 @@ app.include_router(
     tags=["auth"],
 )
 
+app.include_router(reset_user_password_router, prefix="/users"),
+tags = ["Reset password"]
 
 app.include_router(subscription_router, tags=["user subscription"])
 app.include_router(invite_codes_router)

@@ -157,4 +157,5 @@ def load_data():
     insert_data(address_data, index_name)
 
 
-load_data()
+if config.UPDATE_OPENSEARCH_DATA:
+    load_data()

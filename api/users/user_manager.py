@@ -12,7 +12,7 @@ from fastapi_users.authentication import (
     BearerTransport,
     JWTStrategy,
 )
-import requests
+
 from api.config import config
 from api.services.send_email import send_simple_message
 
@@ -25,11 +25,16 @@ def send_confifmation_email(user_email: str, token: str):
     )
 
 
-SECRET = "SECRET"
+def send_password_recovery_email(user_email: str, token: str):
+    send_simple_message(
+        user_email=user_email,
+        subject="Reset password",
+        text=f"https://cityinminutes.me/reset_password?token={token}",
+    )
 
 
 def get_jwt_strategy() -> JWTStrategy:
-    return JWTStrategy(secret=SECRET, lifetime_seconds=3600)
+    return JWTStrategy(secret=config.JWT_SECRET, lifetime_seconds=3600)
 
 
 async def get_user_manager(user_db=Depends(get_user_db)):
@@ -50,8 +55,8 @@ current_user_optional = fastapi_users.current_user(optional=True)
 
 
 class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
-    reset_password_token_secret = SECRET
-    verification_token_secret = SECRET
+    reset_password_token_secret = config.JWT_SECRET
+    verification_token_secret = config.JWT_SECRET
 
     async def on_after_register(
         self, user: User, request: Optional[Request] = None
@@ -61,9 +66,7 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
     async def on_after_forgot_password(
         self, user: User, token: str, request: Optional[Request] = None
     ):
-        print(
-            f"User {user.id} has forgot their password. Reset token: {token}"
-        )
+        send_password_recovery_email(user_email=user.email, token=token)
 
     async def on_after_request_verify(
         self, user: User, token: str, request: Optional[Request] = None

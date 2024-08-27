@@ -23,6 +23,8 @@ class GlobalConfig(BaseConfig):
     SENTRY_DSN: Optional[str] = None
     GOOGLE_MAPS_API_KEY: Optional[str] = None
     MAILGUN_API_KEY: Optional[str] = None
+    JWT_SECRET: Optional[str] = None
+    UPDATE_OPENSEARCH_DATA: Optional[bool] = False
 
 
 class DevConfig(GlobalConfig):
