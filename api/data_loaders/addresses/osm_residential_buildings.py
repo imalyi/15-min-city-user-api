@@ -18,11 +18,11 @@ class AddressDTO:
         postcode: str,
         geometry_raw,
     ) -> None:
-        self.street_name = street_name
-        self.house_number = house_number
-        self.city = city
+        self.street_name = street_name.strip()
+        self.house_number = house_number.strip()
+        self.city = city.strip()
         self.geometry_raw = geometry_raw
-        self.postcode = postcode
+        self.postcode = postcode.strip()
 
         self.required_attributes = [
             self.street_name,
