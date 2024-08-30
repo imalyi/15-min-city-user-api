@@ -105,11 +105,19 @@ def calc_time_for_custom_addressess(
                 mode=mode,
                 departure_time=now,
             )
-            custom_addressess[i]["time"][mode] = (
+            custom_addressess[i][mode] = {}
+            custom_addressess[i][mode]["time"] = (
                 directions_result[0]
                 .get("legs")[0]
                 .get("duration")
                 .get("value")
             )
+            custom_addressess[i][mode]["distance"] = (
+                directions_result[0]
+                .get("legs")[0]
+                .get("distance")
+                .get("value")
+            )
+
         i += 1
     return custom_addressess
