@@ -1,4 +1,5 @@
 from collections import namedtuple
+from os import error
 
 from fastapi.routing import APIRoute
 from geoalchemy2 import exc
@@ -25,6 +26,8 @@ router = APIRouter(prefix="/stops")
 
 
 async def create_data(*, source, category: str):
+    errors = []
+
     for poi in source:
         point = namedtuple("Point", ["lat", "lon"])
         point.lat = poi.lat
@@ -33,25 +36,45 @@ async def create_data(*, source, category: str):
         poi_category = await CategoryDAO.find_one_or_none(
             order_by=None, title=category
         )
-        poi_model = POICreate(name=poi.name, address_id=poi_address[0].id)
+        try:
+            poi_model = POICreate(name=poi.name, address_id=poi_address[0].id)
+        except AttributeError:
+            errors.append(poi)
         try:
             poi = await POIDAO.insert_data(poi_model.model_dump())
             await attach_poi_to_category(poi.id, poi_category.id)
         except DuplicateEntryException:
             continue
+    return errors
 
 
 @router.post("/mevo", status_code=200)
 async def update_mevo_stops(user: User = Depends(current_admin_user)):
+    errors = []
     for city in ["Gdańsk", "Sopot", "Gdynia"]:
         source = MevoStops(city=city)
-        await create_data(source=source, category="MEVO bikes")
+        errors_for_concrete_city = await create_data(
+            source=source, category="MEVO bikes"
+        )
+        errors.append(errors_for_concrete_city)
+    return errors
 
 
 @router.post("/update_stops/{stop_type}/{city}")
 async def update_stops(
     stop_type: str, city: str, user: User = Depends(current_admin_user)
 ):
-    stops = Stops(city=city, stop_type=stop_type)
-    for stop in stops:
-        print(stop)
+    errors = []
+    for city in ["Gdańsk", "Gdynia", "Sopot"]:
+        for type_, category in [
+            ("BUS", "Buses"),
+            ("TRAM", "Trams"),
+            ("BUS_TRAM", "Trams"),
+            ("BUS_TRAM", "Buses"),
+        ]:
+            source = Stops(city=city, stop_type=type_)
+            errors_for_concrete_source = await create_data(
+                source=source, category=category
+            )
+            errors.append(errors_for_concrete_source)
+    return errors

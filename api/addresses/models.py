@@ -26,18 +26,17 @@ class Address(Base):
     full_address: Mapped[str] = mapped_column(
         String,
         Computed(
-            "COALESCE(street_name || ' ' || house_number || ', ' || city || COALESCE(', ' || postcode, ''))"
+            "COALESCE(street_name || ' ' || house_number || ', ' || city)"
         ),
     )
+
     pois: Mapped["POI"] = relationship(back_populates="address", lazy="joined")
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     modified_at: Mapped[datetime] = mapped_column(
         server_onupdate=func.now(), server_default=func.now(), nullable=True
     )
 
-    __table_args__ = (
-        UniqueConstraint("street_name", "house_number", "city", "geometry"),
-    )
+    __table_args__ = (UniqueConstraint("street_name", "house_number", "city"),)
 
     def to_dict(self):
         return {

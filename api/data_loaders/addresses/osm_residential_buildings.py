@@ -12,17 +12,17 @@ class AddressDTO:
     def __init__(
         self,
         *,
-        street_name,
-        house_number,
+        street_name: str,
+        house_number: str,
         city: str,
         postcode: str,
         geometry_raw,
     ) -> None:
-        self.street_name = street_name.strip()
-        self.house_number = house_number.strip()
-        self.city = city.strip()
+        self.street_name = street_name
+        self.house_number = house_number
+        self.city = city
         self.geometry_raw = geometry_raw
-        self.postcode = postcode.strip()
+        self.postcode = postcode
 
         self.required_attributes = [
             self.street_name,
@@ -32,6 +32,12 @@ class AddressDTO:
 
         if not self._check_is_required_attributes_not_empty():
             raise InvalidDTOException
+        self._standartize_values()
+
+    def _standartize_values(self):
+        self.street_name = self.street_name.strip()
+        self.house_number = self.house_number.strip()
+        self.city = self.city.strip()
 
     def _check_is_required_attributes_not_empty(self):
         return all(self.required_attributes)
