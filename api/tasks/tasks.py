@@ -20,6 +20,25 @@ def calc_distance_between_coordinates(from_, to):
     return response.get("routes")[0].get("summary", {}).get("distance", -1)
 
 
+def _insert_poi_to_futures_list(features:list, nearest_points_dict, type_: str):
+    for collection_title, categories in nearest_points_dict[type_].items():
+        for category_title, pois in categories.items():
+            for poi in pois:
+                point = Point(
+                    (poi["location"]["lon"], poi["location"]["lat"])
+                )
+                properties = {
+                    "name": poi["name"],
+                    "address": poi["address"],
+                    "category": category_title,
+                    "collection": collection_title,
+                    "distance": poi["distance"],
+                }
+                features.append(
+                    Feature(geometry=point, properties=properties)
+                )
+
+
 def generate_geojson(nearest_points_dict):
     features = []
 
@@ -33,25 +52,12 @@ def generate_geojson(nearest_points_dict):
 
     # Add POIs as GeoJSON features
     if "pois" in nearest_points_dict:
-        for collection_title, categories in nearest_points_dict[
-            "pois"
-        ].items():
-            for category_title, pois in categories.items():
-                for poi in pois:
-                    point = Point(
-                        (poi["location"]["lon"], poi["location"]["lat"])
-                    )
-                    properties = {
-                        "name": poi["name"],
-                        "address": poi["address"],
-                        "category": category_title,
-                        "collection": collection_title,
-                        "distance": poi["distance"],
-                    }
-                    features.append(
-                        Feature(geometry=point, properties=properties)
-                    )
-
+        _insert_poi_to_futures_list(features, nearest_points_dict, "pois")
+    if "custom_pois" in nearest_points_dict:
+        _insert_poi_to_futures_list(
+            features, nearest_points_dict, "custom_pois"
+        )
+    
     # Create GeoJSON FeatureCollection
     geojson_obj = FeatureCollection(features)
     return geojson_obj
