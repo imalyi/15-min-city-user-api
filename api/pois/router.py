@@ -28,14 +28,15 @@ async def get_all_pois(
     return await POIDAO.find_all(objects_filter=filters)
 
 
-@router.post("/", status_code=201, response_model=None)
+@router.post("/", status_code=201)
 async def create_pois(
     poi_data: POICreate, user: User = Depends(current_admin_user)
 ):
     try:
-        await POIDAO.insert_data(poi_data.model_dump())
+        result = await POIDAO.insert_data(poi_data.model_dump())
     except DuplicateEntryException as err:
         raise HTTPException(409, str(err))
+    return result
 
 
 @router.get("/{poi_id}", status_code=200, response_model=POI)

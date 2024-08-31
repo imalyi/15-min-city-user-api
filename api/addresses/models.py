@@ -13,6 +13,8 @@ from datetime import datetime
 from sqlalchemy import func
 from sqlalchemy import String
 from sqlalchemy.orm import relationship
+from geoalchemy2.shape import to_shape
+from shapely.geometry import mapping
 
 
 class Address(Base):
