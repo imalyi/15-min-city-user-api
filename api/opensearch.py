@@ -144,7 +144,7 @@ def get_all_addresses_from_postgres():
                 "city": result.city,
                 "postcode": result.postcode,
                 "id": result.id,
-                "full_address": result.full_address,
+                "full_address": f"{result.street_name} {result.house_number}, {result.city}",
             }
         )
     return dict_results
