@@ -50,7 +50,7 @@ class BaseDAO:
 
                 result = await session.execute(stmt)
                 await session.commit()
-                return result.fetchone()
+                return result.fetchone()[0]
 
     @classmethod
     async def update_data(cls, model_id: int, **update_data):
