@@ -98,9 +98,8 @@ def calc_time_for_custom_addressess(
 ):
     gmaps = googlemaps.Client(key=config.GOOGLE_MAPS_API_KEY)
     now = datetime.datetime.now()
-    for requested_address in custom_addressess:
-        i = 0
-        custom_addressess[i]["time"] = {}
+    for index, requested_address in enumerate(custom_addressess):
+        route = {}
         for mode in ["transit", "bicycling", "walking", "driving"]:
             # TODO: add different time
             directions_result = gmaps.directions(
@@ -109,19 +108,19 @@ def calc_time_for_custom_addressess(
                 mode=mode,
                 departure_time=now,
             )
-            custom_addressess[i][mode] = {}
-            custom_addressess[i][mode]["time"] = (
+            if mode not in route:
+                route[mode] = {}
+            route[mode]["time"] = (
                 directions_result[0]
                 .get("legs")[0]
                 .get("duration")
                 .get("value")
             )
-            custom_addressess[i][mode]["distance"] = (
+            route[mode]["distance"] = (
                 directions_result[0]
                 .get("legs")[0]
                 .get("distance")
                 .get("value")
             )
-
-        i += 1
+        custom_addressess[index]["route"] = route
     return custom_addressess
