@@ -93,8 +93,6 @@ async def get_task_result(
     task_id: str, request: Request, user: User = Depends(current_active_user)
 ):
     result = AsyncResult(task_id)
-
-    # Определите, какой формат ответа требуется
     accept_header = request.headers.get("accept", "application/json")
 
     if result.state == "PENDING":
@@ -112,7 +110,6 @@ async def get_task_result(
         }
         return JSONResponse(content=response_data, status_code=500)
     elif result.state == "SUCCESS":
-        # Получите нужный элемент из словаря result
         response_data = {
             "task_id": task_id,
             "status": "Success",
@@ -120,7 +117,6 @@ async def get_task_result(
         }
 
         if accept_header == "application/geojson":
-            # Предположим, что geojson это ключ в result.result
             geojson_data = response_data.get("result", {}).get("geojson", {})
             return JSONResponse(content=geojson_data)
         elif accept_header == "application/json":

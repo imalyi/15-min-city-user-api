@@ -41,8 +41,8 @@ async def create_data(*, source, category: str):
         except AttributeError:
             errors.append(poi)
         try:
-            poi = await POIDAO.insert_data(poi_model.model_dump())
-            await attach_poi_to_category(poi.id, poi_category.id)
+            poi_id = await POIDAO.insert_data(poi_model.model_dump())
+            await attach_poi_to_category(poi_id, poi_category.id)
         except DuplicateEntryException:
             continue
     return errors

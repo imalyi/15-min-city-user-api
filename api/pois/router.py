@@ -20,22 +20,31 @@ router = APIRouter(prefix="/pois", tags=["Points of interest"])
 router.include_router(categories_router)
 
 
+# TODO this endpoint returns only unique pois names. Create another endpoint which will return all pois
 @router.get("/", status_code=200, response_model=List[POI])
 async def get_all_pois(
     user: User = Depends(current_active_user),
     filters: POIFilter = FilterDepends(POIFilter),
 ):
-    return await POIDAO.find_all(objects_filter=filters)
+    unique_pois = []
+    present_pois = {}
+    for poi in await POIDAO.find_all(objects_filter=filters):
+        if poi.name in present_pois:
+            continue
+        unique_pois.append(poi)
+        present_pois[poi.name] = 1
+    return unique_pois
 
 
-@router.post("/", status_code=201, response_model=None)
+@router.post("/", status_code=201)
 async def create_pois(
     poi_data: POICreate, user: User = Depends(current_admin_user)
 ):
     try:
-        await POIDAO.insert_data(poi_data.model_dump())
+        result = await POIDAO.insert_data(poi_data.model_dump())
     except DuplicateEntryException as err:
         raise HTTPException(409, str(err))
+    return result
 
 
 @router.get("/{poi_id}", status_code=200, response_model=POI)
