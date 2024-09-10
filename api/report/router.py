@@ -90,7 +90,7 @@ async def generate_report_geojson(
 
 @router.get("/{task_id}", status_code=200)
 async def get_task_result(
-    task_id: str, request: Request, user: User = Depends(current_active_user)
+    task_id: str, request: Request, user: User = Depends(current_user_optional)
 ):
     result = AsyncResult(task_id)
     accept_header = request.headers.get("accept", "application/json")
