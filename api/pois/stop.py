@@ -18,3 +18,6 @@ class Stop:
 
     def __hash__(self) -> int:
         return hash((self.name, self.lat, self.lon))
+
+    def __repr__(self):
+        return f"Stop(name={self.name}, lat={self.lat}, lon={self.lon})"
