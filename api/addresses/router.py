@@ -20,7 +20,7 @@ from api.exceptions import DuplicateEntryException
 router = APIRouter(prefix="/addresses", tags=["Addresses"])
 
 
-@router.post("/", status_code=201, response_model=Address)
+@router.post("/", status_code=201, response_model=int)
 async def create_address(
     new_address: AddressCreate, user: User = Depends(current_admin_user)
 ):

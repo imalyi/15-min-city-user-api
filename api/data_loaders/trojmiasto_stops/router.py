@@ -20,7 +20,8 @@ from api.addresses.dao import AddressDAO
 from api.pois.stops import Stops
 from api.category_collections.categories.schemas import CategoryFilter
 from api.exceptions import DuplicateEntryException
-
+import json
+import asyncio
 
 router = APIRouter(prefix="/stops")
 
@@ -73,8 +74,10 @@ async def update_stops(
             ("BUS_TRAM", "Buses"),
         ]:
             source = Stops(city=city, stop_type=type_)
-            errors_for_concrete_source = await create_data(
+            errors_for_concrete_source = await asyncio.wait_for(create_data(
                 source=source, category=category
-            )
+            ),  timeout=3600)
             errors.append(errors_for_concrete_source)
+    with open("res.txt", "w") as f:
+        f.write(json.dumps(error))
     return errors

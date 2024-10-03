@@ -11,6 +11,7 @@ from api.addresses.schemas import AddressCreate
 from api.addresses.router import create_address
 from pydantic import ValidationError
 from fastapi import HTTPException
+import asyncio
 
 router = APIRouter(prefix="/addresses")
 
@@ -32,4 +33,5 @@ async def update_all_addressess(
         except ValidationError:
             report.mark_address_as_bad(address)
             continue
+
     return report.stats
