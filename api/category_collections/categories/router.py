@@ -24,7 +24,7 @@ from fastapi import Depends
 @categories_router.get("/", status_code=200, response_model=List[Category])
 async def get_all_categories(
     filters: CategoryFilter = FilterDepends(CategoryFilter),
-    user: User = Depends(current_admin_user),
+    user: User = Depends(current_user_optional),
 ):
     return await CategoryDAO.find_all(filters)
 
@@ -33,7 +33,7 @@ async def get_all_categories(
     "/{category_id}", status_code=200, response_model=Category
 )
 async def get_category_by_id(
-    category_id: int, user: User = Depends(current_admin_user)
+    category_id: int, user: User = Depends(current_user_optional)
 ):
     category = await CategoryDAO.find_by_id(category_id)
     if not category:
