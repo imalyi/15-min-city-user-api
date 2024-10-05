@@ -37,6 +37,7 @@ class ReportDAO:
             "pois": pois,
             "custom_pois": custom_pois,
             "custom_addressess": custom_addressess,
+            "request": report_request.model_dump()
         }
 
     @classmethod
