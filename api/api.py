@@ -19,8 +19,7 @@ from api.users.router import (
 )
 from api.users.subscriptions.router import router as users_subscription_router
 from api.contact.router import router as ticket_router
-
-
+from api.users.limits.router import router as user_limits_router
 import sentry_sdk
 from api.config import config
 
@@ -79,3 +78,4 @@ app.include_router(
 app.include_router(verify_user_router, prefix="/users")
 app.include_router(report_router)
 app.include_router(ticket_router)
+app.include_router(user_limits_router, prefix="/users")

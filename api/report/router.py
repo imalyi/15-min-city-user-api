@@ -1,6 +1,7 @@
 from celery.result import AsyncResult
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
+from kombu.exceptions import HttpError
 
 from api.category_collections.categories.router import get_category_by_id
 from api.report.dao import ReportDAO
@@ -10,8 +11,15 @@ from api.users.models import User
 from api.users.user_manager import current_user_optional, current_active_user
 from api.users.history.router import create_history_record
 from api.exceptions import DuplicateEntryException, NotFoundException
+from api.users.limits.router import get_user_limits
+
 
 router = APIRouter(prefix="/report", tags=["Report"])
+
+
+async def is_user_have_requests(user):
+    limits = await get_user_limits(user)
+    return not (limits.used_report_requests >= limits.allowed_requests_per_day)
 
 
 class UserSubscriptionLevelIsNotEnough(Exception):
@@ -61,6 +69,8 @@ async def generate_report_geojson(
     report_request: ReportCreate,
     user: User = Depends(current_active_user),
 ):
+    if not await is_user_have_requests(user):
+        raise HTTPException(403, "User exceed daily limit")
     if not await check_user_permission_on_report(user, report_request):
         raise HTTPException(403, "User dont have permission")
     try:
