@@ -35,8 +35,11 @@ async def get_all_categories(
 async def get_category_by_id(
     category_id: int, user: User = Depends(current_admin_user)
 ):
-    return await CategoryDAO.find_by_id(category_id)
-
+    category = await CategoryDAO.find_by_id(category_id)
+    if not category:
+        raise HTTPException(404, "Category not found")
+    return category
+    
 
 @categories_router.post("/", status_code=201, response_model=Category)
 async def create_category(
