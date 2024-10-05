@@ -1,3 +1,4 @@
+import datetime
 from fastapi import APIRouter, HTTPException
 from api.users.user_manager import current_active_user, current_admin_user
 from api.users.models import User
@@ -15,6 +16,8 @@ from api.users.subscriptions.models import (
     UserSubscription as UserSubcriptionModel,
 )
 from datetime import date, timedelta
+from api.subscriptions.dao import SubscriptionDAO
+from datetime import date
 
 router = APIRouter(prefix="/subscription", tags=["User subcription managment"])
 
@@ -41,3 +44,4 @@ async def activate_code(code: str, user: User = Depends(current_active_user)):
 async def get_user_subscription(user: User = Depends(current_active_user)):
     current_subscription = await UserSubscriptionDAO.find_highest_active_subscription(user.id)
     return current_subscription
+
