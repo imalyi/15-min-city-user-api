@@ -1,3 +1,4 @@
+import datetime
 from fastapi import APIRouter, HTTPException
 from api.users.user_manager import current_active_user, current_admin_user
 from api.users.models import User
@@ -15,6 +16,8 @@ from api.users.subscriptions.models import (
     UserSubscription as UserSubcriptionModel,
 )
 from datetime import date, timedelta
+from api.subscriptions.dao import SubscriptionDAO
+from datetime import date
 
 router = APIRouter(prefix="/subscription", tags=["User subcription managment"])
 
