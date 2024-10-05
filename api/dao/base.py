@@ -66,3 +66,5 @@ class BaseDAO:
                 await session.commit()
                 row = result.fetchone()
                 return row
+
+

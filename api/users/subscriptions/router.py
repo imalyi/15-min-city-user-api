@@ -3,7 +3,6 @@ from api.users.user_manager import current_active_user, current_admin_user
 from api.users.models import User
 from fastapi import Depends
 from api.users.subscriptions.schemas import (
-    UserSubscriptionLimit,
     UserSubcription,
 )
 from api.subscriptions.schema import SubscriptionLevel
@@ -18,11 +17,6 @@ from api.users.subscriptions.models import (
 from datetime import date, timedelta
 
 router = APIRouter(prefix="/subscription", tags=["User subcription managment"])
-
-
-@router.get("/limits", response_model=UserSubscriptionLimit)
-async def get_user_limits(user: User = Depends(current_active_user)):
-    pass
 
 
 @router.post("/codes")
@@ -40,12 +34,10 @@ async def activate_code(code: str, user: User = Depends(current_active_user)):
             "date_to": date.today() + timedelta(days=new_subscription.days),
         }
     )
-    # TODO mark code is used
+    # TODO mark invite code is used
 
 
 @router.get("/", response_model=Union[UserSubcription, None])
 async def get_user_subscription(user: User = Depends(current_active_user)):
-    current_subscription = await UserSubscriptionDAO.find_one_or_none(
-        order_by=UserSubcriptionModel.date_to.desc(), user_id=user.id
-    )
-    return current_subscription if current_subscription.is_active else None
+    current_subscription = await UserSubscriptionDAO.find_highest_active_subscription(user.id)
+    return current_subscription

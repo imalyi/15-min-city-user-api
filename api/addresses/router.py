@@ -1,9 +1,7 @@
 import datetime
-from operator import add
 from fastapi import APIRouter, HTTPException, UploadFile, File
 from typing import List
 from geoalchemy2 import WKTElement
-from pyrosm import get_data
 from api.addresses.dao import AddressDAO
 from api.addresses.schemas import Address
 from api.addresses.schemas import AddressCreate
@@ -13,7 +11,6 @@ from fastapi import Depends
 from api.addresses.schemas import AddressFilter, AddressUpdate
 from fastapi_filter import FilterDepends
 from typing import Union
-import json
 from api.opensearch import find_address_by_partial_name
 from api.exceptions import DuplicateEntryException
 
