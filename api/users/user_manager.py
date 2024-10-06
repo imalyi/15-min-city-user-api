@@ -15,7 +15,7 @@ from fastapi_users.authentication import (
 
 from api.config import config
 from api.services.send_email import send_simple_message
-from api.users.subscriptions.free_trial import give_free_trial
+from api.users.subscriptions.free_trial import give_free_trial, set_free_subs
 
 def send_confifmation_email(user_email: str, token: str):
     send_simple_message(
@@ -64,6 +64,7 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
         self, user: User, request: Optional[Request] = None
     ):
         await give_free_trial(user.id)
+        await set_free_subs(user.id)
 
     async def on_after_forgot_password(
         self, user: User, token: str, request: Optional[Request] = None
