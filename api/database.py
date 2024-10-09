@@ -13,7 +13,7 @@ pk_int = Annotated[int, mapped_column(primary_key=True)]
 required_int = Annotated[int, mapped_column(nullable=False)]
 required_string = Annotated[str, mapped_column(nullable=False)]
 
-engine = create_async_engine(config.DATABASE_URL, echo=True)
+engine = create_async_engine(config.DATABASE_URL, echo=True, pool_size=15000, max_overflow=5000)
 
 async_session_maker = sessionmaker(
     engine, class_=AsyncSession, expire_on_commit=False
